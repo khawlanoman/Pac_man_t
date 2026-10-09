@@ -1,6 +1,6 @@
 from mazegenerator import MazeGenerator
 from src_back.game.constants import Directions
-
+from random import Random
 def load_maze( width:int,height:int,seed:int) -> list:
     grid = MazeGenerator(size=(width,height),perfect=False,seed=seed)
 
@@ -13,6 +13,7 @@ def has_wall(maze:list, r: int,c: int, direction:tuple)-> bool :
     cell_bit = maze[r][c]
     dire_bit = direction.value[2]
     return (cell_bit & dire_bit) != 0
+
 
 def can_move(maze:list, x:int, y:int, direction:tuple)->bool:
     dire_x =direction.value[0]
@@ -48,9 +49,38 @@ def get_center_position(width:int , height: int)-> tuple:
     return (center_x, center_y)
 
 def get_corner_positions(width: int, height: int) -> list:
-    positions = [(1,1),(width - 2, 1)
-                     ,(1, height - 2)
-                     ,(width - 2, height - 2)]
+    positions = [(0,0),(width - 1, 0)
+                     ,(0, height - 1)
+                     ,(width - 1, height - 1)]
     
     return positions
+
+def place_super_pacgums(width: int, height: int)-> list:
+    list_place = get_corner_positions(width, height)
+    return list_place
+
+
+def place_pacgums(maze, count: int, exclude_po, seed) -> list:
+    width = len(maze[0])
+    height = len(maze)
+
+    places= []
+
+    for y in range(height-1) :
+        for x in range(width-1):
+            if maze[y][x] == 15 :
+                continue
+            elif (x, y) in exclude_po:
+                continue
+            places.append((x,y))
+    if count > len(places):
+        print("error pacgum number ")
+        count = len(places)
+
+
+    rendom_gen = Random(seed)
+    rendom_gen.shuffle(places)
+
+    pacgums  =set(places[0:count])
+    return pacgums
 

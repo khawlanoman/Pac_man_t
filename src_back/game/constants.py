@@ -55,7 +55,7 @@ class Defaults(Enum):
     RESPAWN_TIME = 5.0
     INVINCIBILITY_TIME = 2.0
     LEVEL_MAX_TIME = 90.0
-    MAZE_WIGHT = 21
-    MAZE_HEIGHT = 21
+    MAZE_WIGHT = 15
+    MAZE_HEIGHT = 15
     NUM_LEVELS = 10
     SEED = 42
