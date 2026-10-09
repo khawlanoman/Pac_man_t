@@ -23,4 +23,5 @@ class Game_state:
                  self.config = config
                  self.highscores = highscores
 
-    def 
+    def initialize_level() -> None:
+        

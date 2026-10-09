@@ -29,8 +29,6 @@ for row in maze:
         if cell == 15:
             count+=1
 
-print("count:",count)
-
 def print_maze(maze: MazeGenerator, place_pacgum:set,corner_position:list,center_maze) -> None:
     grid = maze.maze
     height = len(grid)
