@@ -60,6 +60,13 @@ def place_super_pacgums(width: int, height: int)-> list:
     return list_place
 
 
+def place_ghosts(width: int, height: int)-> list:
+    positions = [(1,0),(width - 2, 0)
+                     ,(1, height - 1)
+                     ,(width - 2, height - 1)]
+    
+    return positions
+
 def place_pacgums(maze, count: int, exclude_po, seed) -> list:
     width = len(maze[0])
     height = len(maze)

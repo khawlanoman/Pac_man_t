@@ -19,7 +19,7 @@ center_maze = loader.get_center_position(15,15)
 
 corner_position = loader.get_corner_positions(15,15)
 
-
+ghosts_place = loader.place_ghosts(15,15)
 place_pacgum= loader.place_pacgums(maze, 100, corner_position, 42)
 
 
@@ -44,6 +44,9 @@ def print_maze(maze: MazeGenerator, place_pacgum:set,corner_position:list,center
         for x in range(width):
             if (x,y) ==  center_maze:
                 cell = " @ "
+    
+            elif (x,y) in ghosts_place:
+                cell = " G "
             elif (x,y) in place_pacgum:
                 cell = " . "
             elif (x,y) in corner_position:
