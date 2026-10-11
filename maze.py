@@ -2,7 +2,9 @@ from mazegenerator import MazeGenerator
 from src_back.maze_loader import loader
 from src_back import parsing
 from src_back.game import constants
+from src_back.game.gamestate import Game_state
 
+from src_back.game.constants import Game_status
 
 
 
@@ -13,13 +15,14 @@ height = level.height
 seed = data.seed
 maze = loader.load_maze(width,height,seed)
 
-neighbors = loader.get_valid_neighbors(maze,5,5 )
+# neighbors = loader.get_valid_neighbors(maze,5,5 )
 
-center_maze = loader.get_center_position(15,15)
+center_maze = loader.get_center_position(width, height)
 
-corner_position = loader.get_corner_positions(15,15)
+corner_position = loader.get_corner_positions(width, height)
 
-ghosts_place = loader.place_ghosts(15,15)
+super_pacgums = loader.place_super_pacgums(width, height)
+ghosts_place = loader.place_ghosts(width, height)
 place_pacgum= loader.place_pacgums(maze, 100, corner_position, 42)
 
 
@@ -49,7 +52,7 @@ def print_maze(maze: MazeGenerator, place_pacgum:set,corner_position:list,center
                 cell = " G "
             elif (x,y) in place_pacgum:
                 cell = " . "
-            elif (x,y) in corner_position:
+            elif (x,y) in super_pacgums:
                 cell = " & "
             else:
                 cell = "   "
@@ -72,5 +75,13 @@ def print_maze(maze: MazeGenerator, place_pacgum:set,corner_position:list,center
 
         print(line)
 
+count_levels = len(data.levels)
 maze_grid= MazeGenerator(size=(width,height),perfect=False,seed=seed)
 print_maze(maze_grid,place_pacgum,corner_position,center_maze)
+
+game_state =  Game_state(maze, width, height, place_pacgum, super_pacgums, center_maze,
+                        ghosts_place,0,count_levels, data.level_max_time,Game_status.PLAYING,
+                        False,{},data,[])
+
+
+game_state.initialize_level()
