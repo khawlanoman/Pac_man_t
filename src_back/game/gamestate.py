@@ -30,11 +30,11 @@ class Game_state:
     def initialize_level(self) -> None:
         exclude_po = []
         player_position = loader.get_center_position(self.width, self.height)
-        print(player_position)
+
         ghosts_position = loader.place_ghosts(self.width, self.height)
-        print(len(ghosts_position))
+
         super_pacgums = loader.place_super_pacgums(self.width,self.height)
-        print(len(super_pacgums))
+
         exclude_po.extend(player_position)
         exclude_po.extend(ghosts_position)
         exclude_po.extend(super_pacgums)
@@ -48,7 +48,7 @@ class Game_state:
 
         self.pacgums = loader.place_pacgums(self.maze,self.config.pacgum,exclude_po,level_seed)
         self.super_pacgums = loader.place_super_pacgums(self.width,self.height)
-        print(len(self.pacgums))
+
         player = PlayerState(player_position[0],player_position[1],
                              Directions.RIGHT,None,self.config.lives,self.score )
 
@@ -67,10 +67,6 @@ class Game_state:
         self.timer = self.config.level_max_time
 
         self.game_status = Game_status.PLAYING
-        print(self.timer)
-        print(self.score)
-        print(self.config.lives)
-        print(self.game_status)
 
 
 
