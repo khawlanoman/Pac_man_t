@@ -1,11 +1,12 @@
 import json
 from pydantic import ValidationError
 from .models import Game_config
+from argparse import Namespace
 
-def pars_config() :
+def pars_config(file:Namespace) :
 
     try:
-        with open("./config.json", "r") as file:
+        with open(file, "r") as file:
             data = json.load(file)
         
     except json.JSONDecodeError as e:
