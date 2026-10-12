@@ -49,7 +49,7 @@ class Game_state:
         self.pacgums = loader.place_pacgums(self.maze,self.config.pacgum,exclude_po,level_seed)
         self.super_pacgums = loader.place_super_pacgums(self.width,self.height)
 
-        player = PlayerState(player_position[0],player_position[1],
+        self.player = PlayerState(player_position[0],player_position[1],
                              Directions.RIGHT,None,self.config.lives,self.score )
 
         blinky_ghost = GhostState(ghosts_position[0][0],ghosts_position[0][1],Directions.LEFT,
@@ -64,11 +64,27 @@ class Game_state:
         clyde_ghost = GhostState(ghosts_position[3][0],ghosts_position[3][1],Directions.LEFT,
                                 Ghost_type.CLYDE,Ghost_state.SCATTER,ghosts_position[3])
         
+        self.ghosts = [blinky_ghost,plinky_ghost,inky_ghost,clyde_ghost]
         self.timer = self.config.level_max_time
 
         self.game_status = Game_status.PLAYING
 
 
+    def all_data_to_dict(self) -> dict:
+        result_dict = {"maze":self.maze,
+                       "width": self.width,
+                       "height": self.height,
+                       "player": self.player.player_dict(),
+                       "ghosts": [ghost.ghosts_dict() for ghost in self.ghosts],
+                       "pacgums": list(self.pacgums),
+                       "super_pacgums":list(self.super_pacgums),
+                       "score": self.score,
+                       "level": self.level,
+                       "timer": self.timer,
+                       "game_status": self.game_status.value,
+                       "cheat_mode" : self.cheat_mode,
+                       "cheats": self.cheats,
+                       "highscores": self.highscores}
 
-
+        return result_dict
 

@@ -14,4 +14,16 @@ class GhostState:
                  self.my_corner =my_corner
                  self.respawn_time = respawn_time
                  self.speed = speed
-                 
+    
+
+    def ghosts_dict(self) -> dict:
+        ghosts_result = {"x":self.x,
+                         "y":self.y,
+                         "direction":self.direction.name.lower(),
+                         "ghosts_type":self.ghost_type.value,
+                         "state":self.state.value,
+                         "my_corner":self.my_corner,
+                         "respawn_time":self.respawn_time,
+                         "speed":self.speed}
+        
+        return ghosts_result

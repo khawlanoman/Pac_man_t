@@ -33,7 +33,7 @@ for row in maze:
             count+=1
 
 def print_maze(maze: MazeGenerator, place_pacgum:set,corner_position:list,center_maze) -> None:
-    grid = maze.maze
+    grid = maze
     height = len(grid)
     width = len(grid[0])
 
@@ -76,8 +76,8 @@ def print_maze(maze: MazeGenerator, place_pacgum:set,corner_position:list,center
         print(line)
 
 count_levels = len(data.levels)
-maze_grid= MazeGenerator(size=(width,height),perfect=False,seed=seed)
-print_maze(maze_grid,place_pacgum,corner_position,center_maze)
+
+
 
 game_state =  Game_state(maze, width, height, place_pacgum, super_pacgums, center_maze,
                         ghosts_place,0,count_levels, data.level_max_time,Game_status.PLAYING,
@@ -85,3 +85,9 @@ game_state =  Game_state(maze, width, height, place_pacgum, super_pacgums, cente
 
 
 game_state.initialize_level()
+
+all_data  = game_state.all_data_to_dict()
+
+player = (all_data["player"]["x"],all_data["player"]["y"])
+maze_grid= MazeGenerator(size=(width,height),perfect=False,seed=seed)
+print_maze(all_data["maze"],all_data["pacgums"],all_data["super_pacgums"],player)

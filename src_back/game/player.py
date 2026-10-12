@@ -12,3 +12,16 @@ class PlayerState:
         self.is_power = is_power
         self.power_time = power_time
         self.speed =speed
+
+    
+    def player_dict(self) -> dict:
+        player_result ={"x":self.x,
+                        "y":self.y,
+                        "direction":self.direction.name.lower(),
+                        "next_direction": self.next_direction,
+                        "lives": self.lives,
+                        "is_power":self.is_power,
+                        "power_time":self.power_time}
+
+        return player_result
+

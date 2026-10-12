@@ -9,9 +9,9 @@ class Directions(Enum):
 
 
 class Opposite(Enum):
-    UP = "DOWN",
-    DOWN = "UP",
-    LEFT = "RGIHT",
+    UP = "DOWN"
+    DOWN = "UP"
+    LEFT = "RGIHT"
     RIGHT  = "LEFT"
 
 
@@ -22,28 +22,28 @@ class Cell(Enum):
     SUPER_PACGUM = 3
 
 class Game_status(Enum):
-    MENU = "menu",
-    PLAYING = "playing",
-    PAUSED = "paused",
-    GAME_OVER = "game_over",
+    MENU = "menu"
+    PLAYING = "playing"
+    PAUSED = "paused"
+    GAME_OVER = "game_over"
     VICTORY = "victory"
 
 
 class Ghost_state(Enum):
-    CHASE = "chase",
-    SCATTER = "scatter",
-    FRIGHTENED = "frightened",
+    CHASE = "chase"
+    SCATTER = "scatter"
+    FRIGHTENED = "frightened"
     EATEN = "eaten"
 
 class Ghost_type(Enum):
-    BLINKY = "blinky",
-    PINKY = "pinky",
-    INKY = "inky",
+    BLINKY = "blinky"
+    PINKY = "pinky"
+    INKY = "inky"
     CLYDE = "clyde"
 
 class Defaults(Enum):
     LIVES = 3,
-    PACGUM_COUNT = 42,
+    PACGUM_COUNT = 42
     POINTS_PACGUM = 10
     POINTS_SUPER_PACGUM = 50
     POINTS_GHOST = 200
