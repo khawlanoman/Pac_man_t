@@ -67,7 +67,7 @@ def place_ghosts(width: int, height: int)-> list:
     
     return positions
 
-def place_pacgums(maze, count: int, exclude_po, seed) -> list:
+def place_pacgums(maze, count:int, exclude_po, seed:int) -> list:
     width = len(maze[0])
     height = len(maze)
 
