@@ -1,0 +1,18 @@
+# Virtual environments
+.venv/
+pac_venv/
+venv/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Tooling caches
+.mypy_cache/
+.pytest_cache/
+
+# Runtime data
+data/highscores.json
+
+# OS clutter
+.DS_Store
