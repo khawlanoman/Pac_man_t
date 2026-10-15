@@ -1,9 +1,10 @@
 from .constants import Ghost_state, Ghost_type, Game_status,Directions
 from .player import PlayerState
 from .ghost import GhostState
-from  ..models import Game_config
+from ..models import Game_config
 from random import randint
 from ..maze_loader import loader
+
 
 class Game_state:
 
@@ -27,7 +28,6 @@ class Game_state:
                  self.cheats = cheats
                  self.config = config
                  self.highscores = highscores
-
 
     def initialize_level(self) -> None:
         """ this function  for  initialization all the data we need  to use """

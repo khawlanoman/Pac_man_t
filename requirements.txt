@@ -1,0 +1,7 @@
+# Runtime
+pygame-ce>=2.4
+pydantic>=2.0
+
+# Linting (graded by `make lint`)
+flake8>=7.0
+mypy>=1.8
