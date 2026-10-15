@@ -4,6 +4,7 @@ from .ghost import GhostState
 from  ..models import Game_config
 from random import randint
 from ..maze_loader import loader
+
 class Game_state:
 
     def __init__(self,maze:list[list[int]],width:int,height:int,pacgums:set[tuple[int,int]],
@@ -27,7 +28,9 @@ class Game_state:
                  self.config = config
                  self.highscores = highscores
 
+
     def initialize_level(self) -> None:
+        """ this function  for  initialization all the data we need  to use """
         exclude_po = []
         player_position = loader.get_center_position(self.width, self.height)
 
@@ -70,7 +73,9 @@ class Game_state:
         self.game_status = Game_status.PLAYING
 
 
+
     def all_data_to_dict(self) -> dict:
+        """ this function is add  all data we need it  to dict """
         result_dict = {"maze":self.maze,
                        "width": self.width,
                        "height": self.height,
@@ -88,3 +93,79 @@ class Game_state:
 
         return result_dict
 
+
+    def handle_input(self,direct:str) -> None :
+        """ this function is handel the input key by convert it to enum value  """
+        if direct == "up":
+            self.player.next_direction = Directions.UP
+        elif direct == "down":
+            self.player.next_direction = Directions.DOWN
+        elif direct == "left":
+            self.player.next_direction = Directions.LEFT
+        elif direct == "right":
+            self.player.next_direction = Directions.RIGHT
+    
+
+    def update_timers(self,tm:float)-> None:
+        """ this method is for count time of power of player and the time of level"""
+        self.timer -= tm
+        if self.timer <= 0.0:
+            self.timer = 0.0
+        
+        if self.player.is_power:
+            self.player.power_time -= tm
+            if self.player.power_time <= 0.0:
+                self.player.is_power= False
+                self.player.power_time = 0.0
+
+
+
+    def move_player(self, dt):
+            """ this methode is moves the player in the current direction if there is no wall """
+            tile_x = int(self.player.x)
+            tile_y = int(self.player.y)
+            
+
+            if self.player.next_direction:
+                if loader.can_move(self.maze, tile_x, tile_y, self.player.next_direction):
+                    self.player.direction = self.player.next_direction
+                    self.player.next_direction = None
+
+
+
+            if not loader.can_move(self.maze, tile_x, tile_y, self.player.direction):
+                return  
+            
+            dx, dy = self.player.direction.value[:2]
+            target_x = tile_x + dx
+            target_y = tile_y + dy
+            
+            distance = self.player.speed * dt
+            
+            if dx > 0:
+                self.player.x = min(self.player.x + distance, target_x)
+            elif dx < 0:
+                self.player.x = max(self.player.x - distance, target_x)
+            if dy > 0:
+                self.player.y = min(self.player.y + distance, target_y)
+            elif dy < 0:
+                self.player.y = max(self.player.y - distance, target_y)
+
+
+    def check_pacgum_at_player(self)-> None:
+        """this function is check the position of pacman and super_pacgums,pacgums, 
+            if pacman and one of them in the same position  remove it from the list of super_pacgums or
+            pacgums and add the points to score
+        """
+        player_x = int(self.player.x)
+        player_y = int(self.player.y)
+
+        if (player_x,player_y) in self.pacgums:
+            self.pacgums.remove((player_x,player_y))
+            self.score += self.config.points_per_pacgum
+
+        if (player_x,player_y) in self.super_pacgums:
+            self.super_pacgums.remove((player_x,player_y))
+            self.score += self.config.points_per_super_pacgum
+            
+    
