@@ -1,10 +1,9 @@
-from .constants import Ghost_state, Ghost_type, Game_status,Directions
+from .constants import Ghost_state, Ghost_type, Game_status,Directions, Opposite
 from .player import PlayerState
 from .ghost import GhostState
-from ..models import Game_config
+from  ..models import Game_config
 from random import randint
 from ..maze_loader import loader
-
 
 class Game_state:
 
@@ -41,6 +40,7 @@ class Game_state:
         exclude_po.extend(player_position)
         exclude_po.extend(ghosts_position)
         exclude_po.extend(super_pacgums)
+        ghost_freaid = 3.0
     
         if self.level == 0:
             level_seed = self.config.seed
@@ -55,23 +55,22 @@ class Game_state:
         self.player = PlayerState(player_position[0],player_position[1],
                              Directions.RIGHT,None,self.config.lives,self.score )
 
-        blinky_ghost = GhostState(ghosts_position[0][0],ghosts_position[0][1],Directions.LEFT,
-                                  Ghost_type.BLINKY,Ghost_state.SCATTER,ghosts_position[0])
+        blinky_ghost = GhostState(ghosts_position[0][0],ghosts_position[0][1],Directions.RIGHT,
+                                  Ghost_type.BLINKY,Ghost_state.SCATTER,ghosts_position[0],ghost_freaid)
         
         plinky_ghost = GhostState(ghosts_position[1][0],ghosts_position[1][1],Directions.LEFT,
-                                  Ghost_type.PINKY,Ghost_state.SCATTER,ghosts_position[1])
+                                  Ghost_type.PINKY,Ghost_state.SCATTER,ghosts_position[1],ghost_freaid)
         
-        inky_ghost = GhostState(ghosts_position[2][0],ghosts_position[2][1],Directions.LEFT,
-                                Ghost_type.INKY,Ghost_state.SCATTER,ghosts_position[2])
+        inky_ghost = GhostState(ghosts_position[2][0],ghosts_position[2][1],Directions.RIGHT,
+                                Ghost_type.INKY,Ghost_state.SCATTER,ghosts_position[2],ghost_freaid)
         
         clyde_ghost = GhostState(ghosts_position[3][0],ghosts_position[3][1],Directions.LEFT,
-                                Ghost_type.CLYDE,Ghost_state.SCATTER,ghosts_position[3])
+                                Ghost_type.CLYDE,Ghost_state.SCATTER,ghosts_position[3],ghost_freaid)
         
         self.ghosts = [blinky_ghost,plinky_ghost,inky_ghost,clyde_ghost]
         self.timer = self.config.level_max_time
 
         self.game_status = Game_status.PLAYING
-
 
 
     def all_data_to_dict(self) -> dict:
@@ -117,6 +116,8 @@ class Game_state:
             if self.player.power_time <= 0.0:
                 self.player.is_power= False
                 self.player.power_time = 0.0
+        
+
 
 
 
@@ -130,9 +131,9 @@ class Game_state:
                 if loader.can_move(self.maze, tile_x, tile_y, self.player.next_direction):
                     self.player.direction = self.player.next_direction
                     self.player.next_direction = None
-
-
-
+  
+                
+ 
             if not loader.can_move(self.maze, tile_x, tile_y, self.player.direction):
                 return  
             
@@ -166,6 +167,130 @@ class Game_state:
 
         if (player_x,player_y) in self.super_pacgums:
             self.super_pacgums.remove((player_x,player_y))
+
+            for ghost in self.ghosts:
+                ghost.state =  Ghost_state.FRIGHTENED
+                ghost.ghost_freaid = 20.0
             self.score += self.config.points_per_super_pacgum
+
+
+    def  rest_player(self) -> None :
+        """  this function is for decrement 
+        player live if  not in power mode , 
+        and back the player and  ghosts in ther first position """
+        self.player.lives -= 1
+
+        if self.player.lives <= 0 :
+           self.game_status = Game_status.GAME_OVER
+           return
+        
+        player_position = loader.get_center_position(self.width, self.height)
+        ghosts_position = loader.place_ghosts(self.width, self.height)
+
+        self.player.x, self.player.y = player_position
+
+        for ghost in self.ghosts:
+            if ghost.ghost_type == Ghost_type.BLINKY:
+                ghost.x,ghost.y = ghosts_position[0][0], ghosts_position[0][1]
+            elif ghost.ghost_type == Ghost_type.PINKY:
+                ghost.x,ghost.y = ghosts_position[1][0], ghosts_position[1][1]
+            elif ghost.ghost_type == Ghost_type.INKY:
+                ghost.x,ghost.y = ghosts_position[2][0], ghosts_position[2][1]
+            elif ghost.ghost_type == Ghost_type.CLYDE:
+                ghost.x,ghost.y = ghosts_position[3][0], ghosts_position[3][1]
+
+
+    def check_ghost_collision(self) -> None:
+        """ this function is for check position
+        of ghost  and change it state """
+        player_x = int(self.player.x)
+        player_y = int(self.player.y)
+
+        for ghost in self.ghosts:
+
+            if (int(ghost.x), int(ghost.y)) != (player_x, player_y):
+                continue
             
-    
+
+            if ghost.state ==  Ghost_state.EATEN:
+                continue
+
+            elif ghost.state ==  Ghost_state.FRIGHTENED:
+                ghost.state = Ghost_state.EATEN
+                ghost.respawn_time = 30.0
+            
+            else:
+                self.rest_player()
+                break
+
+
+    def update_ghosts_time(self, time) ->None:
+        """ this function is for  update the time
+        of freaid ghost and respawn time of ghost """
+        for ghost in self.ghosts:
+            if ghost.state == Ghost_state.FRIGHTENED:
+                ghost.ghost_freaid -= time
+                
+                if ghost.ghost_freaid <= 0:
+                    ghost.ghost_freaid = 0.0
+                    ghost.state = Ghost_state.SCATTER
+
+            if ghost.state == Ghost_state.EATEN:
+                ghost.respawn_time -= time
+
+                if ghost.respawn_time <= 0:
+                    ghost.respawn_time = 0.0
+                    ghost.state = Ghost_state.SCATTER
+
+    def check_ghost(self, ghost)  -> None:
+        """this function is for help us to rest  the position """
+        ghosts_position = loader.place_ghosts(self.width, self.height)
+
+        if ghost.ghost_type == Ghost_type.BLINKY:
+            ghost.x,ghost.y = ghosts_position[0][0], ghosts_position[0][1]
+        elif ghost.ghost_type == Ghost_type.PINKY:
+            ghost.x,ghost.y = ghosts_position[1][0], ghosts_position[1][1]
+        elif ghost.ghost_type == Ghost_type.INKY:
+            ghost.x,ghost.y = ghosts_position[2][0], ghosts_position[2][1]
+        elif ghost.ghost_type == Ghost_type.CLYDE:
+            ghost.x,ghost.y = ghosts_position[3][0], ghosts_position[3][1]
+        return (ghost.x, ghost.y)
+
+
+    def calculate_distance(self,player, ghost) -> None:
+        return (abs(player.x - ghost.x) + abs(player.y - ghost.y))
+
+    def move_ghosts(self,td ) -> None:
+        """this function for move ghosts"""
+        for ghost in self.ghosts:
+
+            if ghost.state == Ghost_state.EATEN:
+                continue
+
+            ghost_x = int(ghost.x)
+            ghost_y = int(ghost.y)
+
+            center =  (abs(ghost.x - ghost_x) < 0.1 and abs(ghost.y - ghost_y) < 0.1)
+            
+            
+            if center:
+
+                if not loader.can_move(self.maze, ghost_x,ghost_y, ghost.direction):
+                        continue
+
+            direc_x, direc_y = ghost.direction.value[:2]
+            target_x = ghost_x + direc_x
+            target_y = ghost_y + direc_y
+
+            distance = ghost.speed * td
+
+            if direc_x > 0 :
+                ghost.x  = min(ghost.x + distance, target_x)
+            elif direc_x < 0 :
+                ghost.x  = max(ghost.x - distance, target_x)
+
+            if direc_y > 0 :
+                ghost.y  = min(ghost.y + distance, target_y)
+            elif direc_y < 0 :
+                ghost.y  = max(ghost.y - distance, target_y)
+            
