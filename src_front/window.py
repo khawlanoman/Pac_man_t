@@ -28,8 +28,12 @@ def run(config_path: str) -> None:
                        Game_status.PLAYING, False, {}, config, [])
     state.initialize_level()
 
+    elapsed = 0.0
+
     running = True
     while running:
+        dt = clock.tick(FPS) / 1000.0
+        elapsed += dt
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -42,9 +46,10 @@ def run(config_path: str) -> None:
         maze_view.draw_pacgums(screen, data["pacgums"], data["super_pacgums"],
                                40, 40, 42)
         player = data["player"]
+        flashing = (player["power_time"] <= 2.0 and int(elapsed * 6) % 2 == 0)
         for ghost in data["ghosts"]:
-            entities.draw_ghost(screen, ghost, 40, 40, 42)
-        entities.draw_player(screen, player["x"], player["y"], 40, 40, 42)
+            entities.draw_ghost(screen, ghost, flashing, 40, 40, 42)
+        entities.draw_player(screen, player, elapsed, 40, 40, 42)
         pygame.display.flip()
         clock.tick(FPS)
 
