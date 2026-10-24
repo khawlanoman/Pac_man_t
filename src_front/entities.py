@@ -7,7 +7,6 @@ from src_front import sprites
 
 PLAYER_COLOUR = (255, 214, 0)
 MOUTH_FPS = 10
-ROTATION = {"right": 0, "up": 90, "left": 180, "down": 270}
 
 GHOST_COLOURS = {
     "blinky": (255, 74, 74),
@@ -37,9 +36,13 @@ def draw_player(screen: pygame.Surface, player: dict, elapsed: float,
     frame = int(elapsed * MOUTH_FPS) % 3
     image = sprites.load(f"pacman_{frame}", int(size * SPRITE_SCALE_PLAYER))
 
-    angle = ROTATION.get(player["direction"], 0)
-    if angle:
-        image = pygame.transform.rotate(image, angle)
+    direction = player["direction"]
+    if direction == "left":
+        image = pygame.transform.flip(image, True, False)
+    elif direction == "up":
+        image = pygame.transform.rotate(image, 90)
+    elif direction == "down":
+        image = pygame.transform.rotate(image, -90)
 
     cx = origin_x + player["x"] * size + size / 2
     cy = origin_y + player["y"] * size + size / 2
