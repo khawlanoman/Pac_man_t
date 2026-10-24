@@ -6,7 +6,8 @@ from src_back.game.gamestate import Game_state
 from src_back.game.constants import Game_status
 from src_front import maze_view
 from src_front import entities
-import src_front.hud as hud
+from src_front import hud
+from src_front import menu
 
 WIDTH = 720
 HEIGHT = 800
@@ -15,6 +16,9 @@ MAZE_X = 40
 MAZE_Y = 110
 CELL = 42
 FPS = 60
+MENU = "menu"
+PLAYING = "playing"
+PAUSED = "paused"
 BACKGROUND = (8, 9, 16)
 MOVEMENT_KEYS = {
     pygame.K_UP: "up",
@@ -46,36 +50,80 @@ def run(config_path: str) -> None:
     elapsed = 0.0
 
     running = True
+    main_menu = menu.Menu(menu.MAIN_ITEMS, "PAC-MAN")
+    pause_menu = menu.Menu(menu.PAUSE_ITEMS, "PAUSED")
+    current = MENU
+
     while running:
         dt = clock.tick(FPS) / 1000.0
-        elapsed += dt
+
+        # --- input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                direction = MOVEMENT_KEYS.get(event.key)
-                if direction is not None:
-                    state.handle_input(direction)
-        state.update_timers(dt)
-        state.update_ghosts_time(dt)
-        state.move_player(dt)
-        state.check_pacgum_at_player()
-        state.move_ghosts(dt)
-        state.check_ghost_collision()
 
+            elif current == MENU:
+                action = main_menu.handle_event(event)
+                if action == "start":
+                    state.initialize_level()
+                    current = PLAYING
+                elif action == "quit":
+                    running = False
+
+            elif current == PLAYING:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pause_menu.index = 0
+                        current = PAUSED
+                    else:
+                        direction = MOVEMENT_KEYS.get(event.key)
+                        if direction is not None:
+                            state.handle_input(direction)
+
+            elif current == PAUSED:
+                action = pause_menu.handle_event(event)
+                if action == "resume":
+                    current = PLAYING
+                elif action == "menu":
+                    current = MENU
+                elif action == "quit":
+                    running = False
+
+        # --- update
+        if current == PLAYING:
+            elapsed += dt
+            state.update_timers(dt)
+            state.update_ghosts_time(dt)
+            state.move_player(dt)
+            state.check_pacgum_at_player()
+            state.move_ghosts(dt)
+            state.check_ghost_collision()
+
+        # --- draw
         screen.fill(BACKGROUND)
-        # --- draw: read her state, draw it ---
-        data = state.all_data_to_dict()
 
-        maze_view.draw_maze(screen, data["maze"], MAZE_X, MAZE_Y, CELL)
-        maze_view.draw_pacgums(screen, data["pacgums"], data["super_pacgums"],
-                               MAZE_X, MAZE_Y, CELL)
-        player = data["player"]
-        flashing = (player["power_time"] <= 2.0 and int(elapsed * 6) % 2 == 0)
-        for ghost in data["ghosts"]:
-            entities.draw_ghost(screen, ghost, flashing, 40, 40, 42)
-        entities.draw_player(screen, player, elapsed, 40, 40, 42)
-        hud.draw_hud(screen, data, len(config.levels), HUD_HEIGHT)
+        if current == MENU:
+            main_menu.draw(screen)
+        else:
+            data = state.all_data_to_dict()
+            player = data["player"]
+            flashing = (player["power_time"] <= 2.0 and
+                        int(elapsed * 6) % 2 == 0)
+
+            maze_view.draw_maze(screen, data["maze"], MAZE_X, MAZE_Y, CELL)
+            maze_view.draw_pacgums(screen, data["pacgums"],
+                                   data["super_pacgums"],
+                                   MAZE_X, MAZE_Y, CELL)
+
+            for ghost in data["ghosts"]:
+                entities.draw_ghost(screen, ghost, flashing, MAZE_X, MAZE_Y,
+                                    CELL)
+            entities.draw_player(screen, player, elapsed, MAZE_X, MAZE_Y,
+                                 CELL)
+            hud.draw_hud(screen, data, len(config.levels), HUD_HEIGHT)
+            if current == PAUSED:
+                menu.dim(screen)
+                pause_menu.draw(screen)
         pygame.display.flip()
 
     pygame.quit()
