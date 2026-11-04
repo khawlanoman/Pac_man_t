@@ -96,7 +96,7 @@ def run(config_path: str) -> None:
             state.update_ghosts_time(dt)
             state.move_player(dt)
             state.check_pacgum_at_player()
-            state.move_ghosts(dt)
+            #  state.move_ghosts(dt)
             state.check_ghost_collision()
 
         # --- draw
