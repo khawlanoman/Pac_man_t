@@ -103,7 +103,7 @@ def run(config_path: str) -> None:
                 state.check_pacgum_at_player()
                 state.move_ghosts(dt)
                 state.check_ghost_collision()
-            # 
+                state.check_level_complete()
             # state.move_player(dt)
             # state.check_pacgum_at_player()
             # state.update_ghosts_time(dt)

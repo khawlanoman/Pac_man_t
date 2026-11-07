@@ -231,13 +231,16 @@ class Game_state:
             if ghost.state == Ghost_state.EATEN:
                 ghost.state = Ghost_state.WAITING
                 ghost.time_sleep = 10.0
-                ghost.last_tile =None
+                continue
+        
+            elif ghost.state == Ghost_state.WAITING:
+                continue
                 
                 
 
             elif ghost.state ==  Ghost_state.FRIGHTENED:
                 ghost.state = Ghost_state.EATEN
-                ghost.respawn_time = 10.0
+                ghost.respawn_time = 5.0
             
             else:
                 self.rest_player()
