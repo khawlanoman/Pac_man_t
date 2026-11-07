@@ -255,16 +255,16 @@ class Game_state:
                     ghost.ghost_freaid = 0.0
                     ghost.state = Ghost_state.CHASE
 
-            if ghost.state == Ghost_state.EATEN:
+            elif ghost.state == Ghost_state.EATEN:
                 ghost.respawn_time -= time
 
                 if ghost.respawn_time <= 0:
                     ghost.respawn_time = 0.0
-                    ghost.state = Ghost_state.CHASE
+                    ghost.state = Ghost_state.WAITING
 
-            if ghost.state == Ghost_state.WAITING:
+            elif ghost.state == Ghost_state.WAITING:
                 ghost.time_sleep -=time
-                print(ghost.time_sleep)
+
                 if ghost.time_sleep <= 0:
                     ghost.time_sleep = 0.0
                     ghost.state = Ghost_state.CHASE
@@ -284,8 +284,6 @@ class Game_state:
         return (ghost.x, ghost.y)
 
 
-    def calculate_distance(self,player, ghost) -> None:
-        return (abs(player.x - ghost.x) + abs(player.y - ghost.y))
 
 
     def check_level_complete(self) -> None:
@@ -335,8 +333,10 @@ class Game_state:
 
             if ghost.state == Ghost_state.EATEN:
                 ghost.x ,ghost.y = ghost.my_corner
-                ghost.state = Ghost_state.CHASE
+                ghost.state = Ghost_state.WAITING
 
+            if ghost.state == Ghost_state.WAITING:
+                continue
             center = (abs(ghost.x - ghost_x) < 0.1 and abs(ghost.y - ghost_y) < 0.1)
 
             if center and ghost.last_tile != (ghost_x, ghost_y):

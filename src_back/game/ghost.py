@@ -4,7 +4,7 @@ class GhostState:
     def __init__(self,x:float=0.0,y:float=0.0, direction:Directions= Directions.LEFT,
                  ghost_type:Ghost_type= Ghost_type.BLINKY,state:Ghost_state= Ghost_state.CHASE,
                  my_corner:tuple[int,int]=(0,0),
-                 respawn_time:float=5.0,speed:float=4.0, ghost_freaid:float=0.0,time_sleep:float=30.0) -> None:
+                 respawn_time:float=5.0,speed:float=2.0, ghost_freaid:float=0.0,time_sleep:float=10.0) -> None:
 
                  self.x = x 
                  self.y = y 
@@ -27,6 +27,8 @@ class GhostState:
                          "state":self.state.value,
                          "my_corner":self.my_corner,
                          "respawn_time":self.respawn_time,
-                         "speed":self.speed}
+                         "speed":self.speed,
+                         "time_sleep" : self.time_sleep
+                         }
         
         return ghosts_result
