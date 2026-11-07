@@ -1,9 +1,11 @@
-from .constants import Ghost_state, Ghost_type, Game_status,Directions, Opposite
+from .constants import Ghost_state, Ghost_type, Game_status, Directions, Opposite
 from .player import PlayerState
 from .ghost import GhostState
 from  ..models import Game_config
+import random
 from random import randint
 from ..maze_loader import loader
+
 
 class Game_state:
 
@@ -12,7 +14,7 @@ class Game_state:
                  ghosts:list[GhostState],score:int, level:int, timer:float,game_status:Game_status,
                  cheat_mode:bool, cheats:dict[str,bool],config:Game_config, highscores:list[dict]) -> None:
 
-                 self.maze = maze
+                 
                  self.width = width
                  self.height = height
                  self.pacgums = pacgums
@@ -27,6 +29,14 @@ class Game_state:
                  self.cheats = cheats
                  self.config = config
                  self.highscores = highscores
+                
+                #  if self.level == 0:
+                #     level_seed = self.config.seed
+                #  else:
+                #     level_seed = randint(1, 100)
+
+                #  self.grid = grid
+                 self.maze = maze
 
     def initialize_level(self) -> None:
         """ this function  for  initialization all the data we need  to use """
@@ -48,8 +58,8 @@ class Game_state:
             level_seed = randint(1, 100)
         
         
-
-        self.maze = loader.load_maze(self.width,self.height, level_seed)
+        
+        # grid = self.grid
 
         self.pacgums = loader.place_pacgums(self.maze,self.config.pacgum,exclude_po,level_seed)
         self.super_pacgums = loader.place_super_pacgums(self.width,self.height)
@@ -126,19 +136,21 @@ class Game_state:
 
     def move_player(self, dt):
             """ this methode is moves the player in the current direction if there is no wall """
-            tile_x = int(self.player.x)
-            tile_y = int(self.player.y)
+            tile_x = round(self.player.x)
+            tile_y = round(self.player.y)
             
+            center = (abs(self.player.x - tile_x) < 0.1 and abs(self.player.y - tile_y) < 0.1)
 
-            if self.player.next_direction:
-                if loader.can_move(self.maze, tile_x, tile_y, self.player.next_direction):
-                    self.player.direction = self.player.next_direction
-                    self.player.next_direction = None
-  
-                
- 
-            if not loader.can_move(self.maze, tile_x, tile_y, self.player.direction):
-                return  
+            if center :
+                if self.player.next_direction:
+                    if loader.can_move(self.maze, tile_x, tile_y, self.player.next_direction):
+                        self.player.direction = self.player.next_direction
+                        self.player.next_direction = None
+    
+                    
+    
+                if not loader.can_move(self.maze, tile_x, tile_y, self.player.direction):
+                    return  
             
             dx, dy = self.player.direction.value[:2]
             target_x = tile_x + dx
@@ -161,8 +173,8 @@ class Game_state:
             if pacman and one of them in the same position  remove it from the list of super_pacgums or
             pacgums and add the points to score
         """
-        player_x = int(self.player.x)
-        player_y = int(self.player.y)
+        player_x = round(self.player.x)
+        player_y = round(self.player.y)
 
         if (player_x,player_y) in self.pacgums:
             self.pacgums.remove((player_x,player_y))
@@ -206,21 +218,26 @@ class Game_state:
     def check_ghost_collision(self) -> None:
         """ this function is for check position
         of ghost  and change it state """
-        player_x = int(self.player.x)
-        player_y = int(self.player.y)
+  
 
         for ghost in self.ghosts:
 
-            if (int(ghost.x), int(ghost.y)) != (player_x, player_y):
-                continue
-            
+            distance = abs(ghost.x - self.player.x) + abs(ghost.y - self.player.y)
 
-            if ghost.state ==  Ghost_state.EATEN:
+            if distance > 0.5:     
                 continue
+
+
+            if ghost.state == Ghost_state.EATEN:
+                ghost.state = Ghost_state.WAITING
+                ghost.time_sleep = 10.0
+                ghost.last_tile =None
+                
+                
 
             elif ghost.state ==  Ghost_state.FRIGHTENED:
                 ghost.state = Ghost_state.EATEN
-                ghost.respawn_time = 30.0
+                ghost.respawn_time = 10.0
             
             else:
                 self.rest_player()
@@ -233,17 +250,25 @@ class Game_state:
         for ghost in self.ghosts:
             if ghost.state == Ghost_state.FRIGHTENED:
                 ghost.ghost_freaid -= time
-                
+
                 if ghost.ghost_freaid <= 0:
                     ghost.ghost_freaid = 0.0
-                    ghost.state = Ghost_state.SCATTER
+                    ghost.state = Ghost_state.CHASE
 
             if ghost.state == Ghost_state.EATEN:
                 ghost.respawn_time -= time
 
                 if ghost.respawn_time <= 0:
                     ghost.respawn_time = 0.0
-                    ghost.state = Ghost_state.SCATTER
+                    ghost.state = Ghost_state.CHASE
+
+            if ghost.state == Ghost_state.WAITING:
+                ghost.time_sleep -=time
+                print(ghost.time_sleep)
+                if ghost.time_sleep <= 0:
+                    ghost.time_sleep = 0.0
+                    ghost.state = Ghost_state.CHASE
+
 
     def check_ghost(self, ghost)  -> None:
         ghosts_position = loader.place_ghosts(self.width, self.height)
@@ -261,86 +286,6 @@ class Game_state:
 
     def calculate_distance(self,player, ghost) -> None:
         return (abs(player.x - ghost.x) + abs(player.y - ghost.y))
-
-
-
-    def move_ghosts(self,td ) -> None:
-    
-        for ghost in self.ghosts:
-
-            if ghost.state == Ghost_state.EATEN:
-                ghost.x, ghost.y = ghost.my_corner
-                ghost.state = Ghost_state.SCATTER
-                continue
-
-            ghost_x = round(ghost.x)
-            ghost_y = round(ghost.y)
-
-            center =  (abs(ghost.x - ghost_x) < 0.1 and abs(ghost.y - ghost_y) < 0.1)
-            
-            
-            if center:
-
-                if ghost.state == Ghost_state.SCATTER:
-                    target_x,target_y = self.check_ghost(ghost)
-                elif ghost.state == Ghost_state.CHASE:
-                    target_x,target_y = self.player.x, self.player.y
-                elif ghost.state == Ghost_state.FRIGHTENED:
-                    continue
-
-                
-                best_distance = 999
-                best_direct = None
-                opposite = Directions[Opposite[ghost.direction.name].value]
-                opposite_dire = None
-                for dic in Directions:
-
-                    if  dic == opposite:
-                        if loader.can_move(self.maze, ghost_x,ghost_y, dic):
-                            opposite_dire = dic
-                        continue
-
-                    if not loader.can_move(self.maze, ghost_x,ghost_y, dic):
-                        continue
-                    
-                    if ghost.state == Ghost_state.FRIGHTENED:
-                        best_direct = dic
-                    else:
-                        direc_x, direc_y = dic.value[:2]
-                        next_x = ghost_x + direc_x
-                        next_y = ghost_y + direc_y
-
-                       
-
-                        distance = abs(target_x - next_x) + abs(target_y - next_y)
-
-                        if distance < best_distance:
-                            best_distance = distance
-                            best_direct = dic
-                
-                if best_direct is not None:
-                    ghost.direction = best_direct
-                elif opposite_dire is not None:
-                    ghost.direction = opposite_dire
-                else:
-                    continue
-             
-            direc_x, direc_y = ghost.direction.value[:2]
-            target_x = ghost_x + direc_x
-            target_y = ghost_y + direc_y
-
-            distance = ghost.speed * td
-
-            if direc_x > 0 :
-                ghost.x  = min(ghost.x + distance, target_x)
-            elif direc_x < 0 :
-                ghost.x  = max(ghost.x - distance, target_x)
-
-            if direc_y > 0 :
-                ghost.y  = min(ghost.y + distance, target_y)
-            elif direc_y < 0 :
-                ghost.y  = max(ghost.y - distance, target_y)
-            
 
 
     def check_level_complete(self) -> None:
@@ -378,4 +323,82 @@ class Game_state:
         self.player.lives +=1
             
 
+    def move_ghosts(self, dt) -> None:
 
+        target_x = self.player.x
+        target_y = self.player.y
+        
+        for ghost in self.ghosts:
+
+            ghost_x = round(ghost.x)
+            ghost_y = round(ghost.y)
+
+            if ghost.state == Ghost_state.EATEN:
+                ghost.x ,ghost.y = ghost.my_corner
+                ghost.state = Ghost_state.CHASE
+
+            center = (abs(ghost.x - ghost_x) < 0.1 and abs(ghost.y - ghost_y) < 0.1)
+
+            if center and ghost.last_tile != (ghost_x, ghost_y):
+                ghost.last_tile = (ghost_x, ghost_y)
+
+                if  ghost.state ==  Ghost_state.CHASE:
+                    all_directions = []
+                    for i in Directions:
+                        if loader.can_move(self.maze,ghost_x,ghost_y,i):
+                            all_directions.append(i.name)
+
+                    oppesite = Directions[Opposite[ghost.direction.name].value]
+
+                    if oppesite.name in all_directions and len(all_directions) > 1:
+                        all_directions.remove(oppesite.name)
+                   
+                    distance_direct = {}
+                    for i in all_directions:
+                      
+                        direct = Directions[i]
+                        dx ,dy = direct.value[:2]
+                        nextp_x,nextp_y = ((dx + ghost_x) , (dy + ghost_y))
+
+                        distance = (abs(target_x - nextp_x) + abs(target_y - nextp_y))
+                        distance_direct[i] = distance
+
+                    keys = []
+                    min_distance = min(distance_direct.values())
+                    for k,v in distance_direct.items():
+                        if  v == min_distance:
+
+                            keys.append(k)
+                            break
+                    ghost.direction = Directions[keys[0]]
+
+                if ghost.state == Ghost_state.FRIGHTENED:
+                    all_directions = []
+                    for i in Directions:
+                        if loader.can_move(self.maze,ghost_x,ghost_y,i):
+                            all_directions.append(i.name)
+
+                    oppesite = Directions[Opposite[ghost.direction.name].value]
+
+                    if oppesite.name in all_directions and len(all_directions) > 1:
+                        all_directions.remove(oppesite.name)
+                   
+                    ghost.direction = Directions[random.choice(all_directions)]
+
+            dx ,dy = ghost.direction.value[:2]
+
+            next_x = ghost_x + dx
+            next_y = ghost_y + dy
+
+            distance = ghost.speed * dt
+
+            if dx > 0:
+                ghost.x = min(ghost.x + distance, next_x)
+            elif dx < 0:
+                ghost.x = max(ghost.x - distance, next_x)
+            
+            if dy > 0:
+                ghost.y = min(ghost.y + distance, next_y)
+            elif dy < 0:
+                ghost.y = max(ghost.y - distance, next_y)
+                

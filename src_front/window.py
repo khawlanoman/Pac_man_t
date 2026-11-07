@@ -4,6 +4,7 @@ import pygame
 from src_back import parsing
 from src_back.game.gamestate import Game_state
 from src_back.game.constants import Game_status
+from src_back.maze_loader import loader
 from src_front import maze_view
 from src_front import entities
 from src_front import hud
@@ -42,7 +43,8 @@ def run(config_path: str) -> None:
     # --- setup: build the level once, before the loop ---
     config = parsing.pars_config(config_path)
     level = config.levels[0]
-    state = Game_state(None, level.width, level.height, set(), set(), None,
+    maze = loader.load_maze(level.width,level.height, config.seed)
+    state = Game_state(maze, level.width, level.height, set(), set(), None,
                        [], 0, 0, config.level_max_time,
                        Game_status.PLAYING, False, {}, config, [])
     state.initialize_level()
@@ -91,14 +93,24 @@ def run(config_path: str) -> None:
 
         # --- update
         if current == PLAYING:
-            elapsed += dt
-            state.update_timers(dt)
-            state.update_ghosts_time(dt)
-            state.move_player(dt)
-            state.check_pacgum_at_player()
-            #  state.move_ghosts(dt)
-            state.check_ghost_collision()
-
+            if state.game_status == Game_status.GAME_OVER:
+                current = MENU      # or show a game over screen
+            else:
+                elapsed += dt
+                state.update_timers(dt)
+                state.update_ghosts_time(dt)
+                state.move_player(dt)
+                state.check_pacgum_at_player()
+                state.move_ghosts(dt)
+                state.check_ghost_collision()
+            # 
+            # state.move_player(dt)
+            # state.check_pacgum_at_player()
+            # state.update_ghosts_time(dt)
+            # state.move_ghosts(dt)
+            # # game_state.ghosts_ai()
+            # state.check_ghost_collision()
+            # state.check_level_complete()
         # --- draw
         screen.fill(BACKGROUND)
 

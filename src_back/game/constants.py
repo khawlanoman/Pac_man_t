@@ -11,7 +11,7 @@ class Directions(Enum):
 class Opposite(Enum):
     UP = "DOWN"
     DOWN = "UP"
-    LEFT = "RGIHT"
+    LEFT = "RIGHT"
     RIGHT  = "LEFT"
 
 
@@ -31,7 +31,7 @@ class Game_status(Enum):
 
 class Ghost_state(Enum):
     CHASE = "chase"
-    SCATTER = "scatter"
+    WAITING = "waiting"
     FRIGHTENED = "frightened"
     EATEN = "eaten"
 
