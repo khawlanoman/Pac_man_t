@@ -1,6 +1,7 @@
 """Draws maze cells from their wall bitmask."""
 
 import pygame
+from src_front import theme
 
 WALL_COLOUR = (62, 104, 232)
 WALL_WIDTH = 4
@@ -9,7 +10,7 @@ SUPER_COLOUR = (255, 186, 74)
 
 
 def draw_cell(screen: pygame.Surface, mask: int,
-              x: int, y: int, size: int) -> None:
+              x: int, y: int, size: int, colour: tuple[int, int, int] = theme.WALL) -> None:
     """Draw the walls of one cell.
 
     Args:
@@ -25,20 +26,20 @@ def draw_cell(screen: pygame.Surface, mask: int,
     bottom_right = (x + size, y + size)
 
     if mask & 1:
-        pygame.draw.line(screen, WALL_COLOUR, top_left, top_right, WALL_WIDTH)
+        pygame.draw.line(screen, colour, top_left, top_right, WALL_WIDTH)
     if mask & 2:
-        pygame.draw.line(screen, WALL_COLOUR, top_right, bottom_right,
+        pygame.draw.line(screen, colour, top_right, bottom_right,
                          WALL_WIDTH)
     if mask & 4:
-        pygame.draw.line(screen, WALL_COLOUR, bottom_left, bottom_right,
+        pygame.draw.line(screen, colour, bottom_left, bottom_right,
                          WALL_WIDTH)
     if mask & 8:
-        pygame.draw.line(screen, WALL_COLOUR, top_left, bottom_left,
+        pygame.draw.line(screen, colour, top_left, bottom_left,
                          WALL_WIDTH)
 
 
 def draw_maze(screen: pygame.Surface, maze: list[list[int]],
-              origin_x: int, origin_y: int, size: int) -> None:
+              origin_x: int, origin_y: int, size: int, colour: tuple[int, int, int] = theme.WALL) -> None:
     """Draw every cell of the maze.
 
     Args:
@@ -53,7 +54,7 @@ def draw_maze(screen: pygame.Surface, maze: list[list[int]],
             draw_cell(screen, mask,
                       origin_x + x * size,
                       origin_y + y * size,
-                      size)
+                      size, colour)
 
 
 def cell_center(cx: int, cy: int, origin_X: int, origin_Y: int,

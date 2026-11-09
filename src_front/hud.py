@@ -1,13 +1,19 @@
 """Draws the heads-up display: score, lives, level and timer."""
 
+from numpy import size
+
 import pygame
+import src_front.theme as theme
+import src_front.theme as sprites
 
 TEXT = (234, 238, 252)
 MUTED = (128, 139, 176)
 DANGER = (255, 94, 94)
 PANEL = (16, 18, 30)
 
+FONT_PATH = "assets/fonts/game_font_1.TTF"
 _fonts: dict[int, pygame.font.Font] = {}
+_fonts[size] = pygame.font.Font(FONT_PATH, size)
 
 
 def font(size: int) -> pygame.font.Font:
@@ -22,7 +28,8 @@ def font(size: int) -> pygame.font.Font:
 
 
 def draw_label(screen: pygame.Surface, title: str, value: str,
-               x: int, y: int, align: str = "left") -> None:
+               x: int, y: int, align: str = "left",
+               colour: tuple[int, int, int] = theme.TEXT) -> None:
     """Draw a small caption with a larger value beneath it.
 
     Args:
@@ -33,8 +40,8 @@ def draw_label(screen: pygame.Surface, title: str, value: str,
         y: Top of the caption in pixels.
         align: "left", "center" or "right", relative to x.
     """
-    cap = font(13).render(title, True, MUTED)
-    val = font(22).render(value, True, TEXT)
+    cap = font(9).render(title, True, theme.MUTED)
+    val = font(18).render(value, True, colour)
 
     for surface, offset in [(cap, 0), (val, 22)]:
         rect = surface.get_rect()
@@ -47,30 +54,34 @@ def draw_label(screen: pygame.Surface, title: str, value: str,
         rect.top = y + offset
         screen.blit(surface, rect)
 
+def draw_lives(screen: pygame.Surface, lives: int, x: int, y: int) -> None:
+    """Draw one small Pac-Man icon per remaining life."""
+    icon = sprites.load("pacman_1", 22)
+    for i in range(lives):
+        screen.blit(icon, (x + i * 30, y))
 
-def draw_hud(screen: pygame.Surface, data: dict,
-             total_levels: int, height: int) -> None:
-    """Draw the HUD strip across the top of the window.
+
+def draw_hud(screen: pygame.Surface, data: dict, total_levels: int) -> None:
+    """Draw the HUD as a floating rounded card at the top of the window.
 
     Args:
         screen: Surface to draw on.
         data: The snapshot from all_data_to_dict().
         total_levels: How many levels the config defines.
-        height: Height of the strip in pixels.
     """
-    width = screen.get_width()
-    pygame.draw.rect(screen, PANEL, pygame.Rect(0, 0, width, height))
+    pygame.draw.rect(screen, theme.SURFACE, CARD,
+                     border_radius=theme.RADIUS_PANEL)
+    pygame.draw.rect(screen, theme.BORDER, CARD, width=theme.BORDER_WIDTH,
+                     border_radius=theme.RADIUS_PANEL)
 
-    pad = 28
-    draw_label(screen, "SCORE", str(data["score"]), pad, 14)
-
-    level = data["level"] + 1
-    draw_label(screen, "LEVEL", f"{level} / {total_levels}",
-               width // 2, 14, align="center")
+    top = CARD.top + 22
+    draw_label(screen, "SCORE", str(data["score"]), CARD.left + 28, top)
+    draw_lives(screen, data["player"]["lives"], CARD.left + 170, top + 8)
+    draw_label(screen, "LEVEL", f"{data['level'] + 1}/{total_levels}",
+               CARD.left + 450, top, align="center")
 
     seconds = max(0, int(data["timer"] + 0.999))
-    colour = DANGER if seconds <= 10 else TEXT
-    clock = font(20).render(f"{seconds // 60}:{seconds % 60:02d}", True,
-                            colour)
-    rect = clock.get_rect(center=(width // 2, 72))
-    screen.blit(clock, rect)
+    clock = f"{seconds // 60}:{seconds % 60:02d}"
+    colour = theme.DANGER if seconds <= 10 else theme.TEXT
+    draw_label(screen, "TIME", clock, CARD.right - 28, top,
+           align="right", colour=colour)

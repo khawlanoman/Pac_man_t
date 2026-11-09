@@ -3,9 +3,9 @@
 import pygame
 
 from src_front import hud
-
-ACCENT = (255, 214, 10)
-MUTED = (128, 139, 176)
+from src_front import hud
+from src_front import sprites
+from src_front import theme
 
 MAIN_ITEMS = [
     ("START GAME", "start"),
@@ -32,19 +32,29 @@ def dim(screen: pygame.Surface, alpha: int = 190) -> None:
     veil.fill((6, 7, 12, alpha))
     screen.blit(veil, (0, 0))
 
+def draw_tagline(screen: pygame.Surface) -> None:
+    """Draw the line under the title."""
+    text = hud.font(12).render("GHOSTS! MORE GHOSTS!", True, theme.MUTED)
+    screen.blit(text, text.get_rect(center=(screen.get_width() // 2, 174)))
+
 
 class Menu:
     """A menu driven by both keyboard and mouse."""
 
-    def __init__(self, items: list[tuple[str, str]], title: str) -> None:
+    def __init__(self, items: list[tuple[str, str]], title: str,
+             title_y: int = 124, items_y: int = 322) -> None:
         """Build a menu.
 
         Args:
             items: Pairs of (label, action name).
             title: Heading shown above the list.
+            title_y: Vertical centre of the title, in pixels.
+            items_y: Vertical centre of the first item, in pixels.
         """
         self.items = items
         self.title = title
+        self.title_y = title_y
+        self.items_y = items_y
         self.index = 0
         self.rects: list[pygame.Rect] = []
 
@@ -96,19 +106,20 @@ class Menu:
         center = screen.get_width() // 2
         self.rects = []
 
-        title = hud.font(44).render(self.title, True, ACCENT)
-        screen.blit(title, title.get_rect(center=(center, 140)))
+        title_font = hud.font(56)
+        shadow = title_font.render(self.title, True, theme.SHADOW)
+        title = title_font.render(self.title, True, theme.PRIMARY)
+        pos = title.get_rect(center=(center, self.title_y))
+        screen.blit(shadow, pos.move(5, 6))
+        screen.blit(title, pos)
 
         for i, (label, _) in enumerate(self.items):
-            colour = ACCENT if i == self.index else MUTED
-            text = hud.font(22).render(label, True, colour)
-            rect = text.get_rect(center=(center, 300 + i * 56))
-            screen.blit(text, rect)
-            self.rects.append(rect.inflate(40, 20))
-
-            if i == self.index:
-                pygame.draw.polygon(screen, ACCENT, [
-                    (rect.left - 30, rect.centery - 8),
-                    (rect.left - 30, rect.centery + 8),
-                    (rect.left - 16, rect.centery),
-                ])
+            selected = i == self.index
+            colour = theme.PRIMARY if selected else theme.MUTED
+            text = hud.font(20).render(label, True, colour)
+            rect = text.get_rect(center=(center, self.items_y + i * 50))
+        screen.blit(text, rect)
+        self.rects.append(rect.inflate(80, 20))
+        if selected:
+            cursor = sprites.load("pacman_1", 28)
+            screen.blit(cursor, (rect.left - 46, rect.centery - 14))

@@ -9,12 +9,14 @@ from src_front import maze_view
 from src_front import entities
 from src_front import hud
 from src_front import menu
+from src_front import theme
 
 WIDTH = 720
 HEIGHT = 800
 HUD_HEIGHT = 90
-MAZE_X = 40
-MAZE_Y = 110
+BACKGROUND = theme.BG
+MAZE_X = 45
+MAZE_Y = 122
 CELL = 42
 FPS = 60
 MENU = "menu"
@@ -132,7 +134,7 @@ def run(config_path: str) -> None:
                                     CELL)
             entities.draw_player(screen, player, elapsed, MAZE_X, MAZE_Y,
                                  CELL)
-            hud.draw_hud(screen, data, len(config.levels), HUD_HEIGHT)
+            hud.draw_hud(screen, data, len(config.levels))
             if current == PAUSED:
                 menu.dim(screen)
                 pause_menu.draw(screen)
