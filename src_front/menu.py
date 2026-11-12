@@ -38,6 +38,53 @@ def draw_tagline(screen: pygame.Surface) -> None:
     screen.blit(text, text.get_rect(center=(screen.get_width() // 2, 174)))
 
 
+def draw_parade(screen: pygame.Surface) -> None:
+    """draw the four ghosts followed by pacman"""
+    x = 213
+    for name in ("ghost_blinky", "ghost_pinky", "ghost_inky", "ghost_clyde"):
+        screen.blit(sprites.load(name, 40), (x, 224))
+        x += 54
+    screen.blit(sprites.load("pacman_2", 40), (x + 24, 224))
+
+
+def draw_leaderboard(screen: pygame.Surface, scores: list[dict]) -> None:
+    """Draw the best three scores in a rounded card.
+
+    Args:
+        screen: Surface to draw on.
+        scores: Entries from highscores.load(), best first.
+    """
+    card = pygame.Rect(0, 530, 360, 136)
+    card.centerx = screen.get_width() // 2
+    pygame.draw.rect(screen, theme.SURFACE, card, border_radius=theme.RADIUS_PANEL)
+    pygame.draw.rect(screen, theme.BORDER, card, width=theme.BORDER_WIDTH, border_radius=theme.RADIUS_PANEL)
+    head = hud.font(9).render("BEST", True, theme.MUTED)
+    screen.blit(head, head.get_rect(center=(card.centerx, card.top + 26)))
+
+    if not scores:
+        empty = hud.font(9).render("No scores yet", True, theme.MUTED)
+        screen.blit(empty, empty.get_rect(center=card.center))
+        return
+
+    for i, entry in enumerate(scores[:3]):
+        y = card.top + 52 + i * 26
+        colour = theme.PRIMARY if i == 0 else theme.TEXT
+        rank = hud.font(11).render(f"{i + 1}.", True, theme.MUTED)
+        name = hud.font(11).render(entry["name"], True, colour)
+        score = hud.font(11).render(str(entry["score"]), True, colour)
+        screen.blit(rank, (card.left + 30, y))
+        screen.blit(name, (card.left + 70, y))
+        screen.blit(score, score.get_rect(topright=(card.right - 30, y)))
+
+
+
+def draw_hint(screen: pygame.Surface) -> None:
+    """draw the controls reminder at the bottom"""
+    text = hud.font(8).render("ARROWS / MOUSE - ENTER - Q TO QUIT", True, theme.MUTED)
+    screen.blit(text, text.get_rect(center=(screen.get_width() // 2, 760)))
+
+
+
 class Menu:
     """A menu driven by both keyboard and mouse."""
 
@@ -118,8 +165,8 @@ class Menu:
             colour = theme.PRIMARY if selected else theme.MUTED
             text = hud.font(20).render(label, True, colour)
             rect = text.get_rect(center=(center, self.items_y + i * 50))
-        screen.blit(text, rect)
-        self.rects.append(rect.inflate(80, 20))
-        if selected:
-            cursor = sprites.load("pacman_1", 28)
-            screen.blit(cursor, (rect.left - 46, rect.centery - 14))
+            screen.blit(text, rect)
+            self.rects.append(rect.inflate(80, 20))
+            if selected:
+                cursor = sprites.load("pacman_1", 28)
+                screen.blit(cursor, (rect.left - 46, rect.centery - 14))

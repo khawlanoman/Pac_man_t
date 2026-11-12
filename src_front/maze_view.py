@@ -3,14 +3,12 @@
 import pygame
 from src_front import theme
 
-WALL_COLOUR = (62, 104, 232)
 WALL_WIDTH = 4
-PACGUM_COLOUR = (255, 222, 173)
-SUPER_COLOUR = (255, 186, 74)
 
 
-def draw_cell(screen: pygame.Surface, mask: int,
-              x: int, y: int, size: int, colour: tuple[int, int, int] = theme.WALL) -> None:
+def draw_cell(screen: pygame.Surface, mask: int, x: int, y: int, size: int,
+              colour: tuple[int, int, int] = theme.WALL,
+              fill: tuple[int, int, int] = theme.BLOCK) -> None:
     """Draw the walls of one cell.
 
     Args:
@@ -20,6 +18,9 @@ def draw_cell(screen: pygame.Surface, mask: int,
         y: Pixel position of the cell's top edge.
         size: Cell width and height in pixels.
     """
+    if mask == 15:
+        pygame.draw.rect(screen, fill, (x, y, size, size))
+
     top_left = (x, y)
     top_right = (x + size, y)
     bottom_left = (x, y + size)
@@ -39,7 +40,9 @@ def draw_cell(screen: pygame.Surface, mask: int,
 
 
 def draw_maze(screen: pygame.Surface, maze: list[list[int]],
-              origin_x: int, origin_y: int, size: int, colour: tuple[int, int, int] = theme.WALL) -> None:
+              origin_x: int, origin_y: int, size: int,
+              colour: tuple[int, int, int] = theme.WALL,
+              fill: tuple[int, int, int] = theme.BLOCK) -> None:
     """Draw every cell of the maze.
 
     Args:
@@ -54,7 +57,7 @@ def draw_maze(screen: pygame.Surface, maze: list[list[int]],
             draw_cell(screen, mask,
                       origin_x + x * size,
                       origin_y + y * size,
-                      size, colour)
+                      size, colour, fill)
 
 
 def cell_center(cx: int, cy: int, origin_X: int, origin_Y: int,
@@ -65,7 +68,7 @@ def cell_center(cx: int, cy: int, origin_X: int, origin_Y: int,
 
 
 def draw_pacgums(screen: pygame.Surface,
-                 pacgums: list[list[bool]],
+                 pacgums: list[tuple[int, int]],
                  super_pacgums: list[tuple[int, int]],
                  origin_x: int, origin_y: int, size: int) -> None:
     """Draw the remaining pellets.
@@ -83,12 +86,12 @@ def draw_pacgums(screen: pygame.Surface,
 
     for cx, cy in pacgums:
         pygame.draw.circle(
-            screen, PACGUM_COLOUR,
+            screen, theme.PELLET,
             cell_center(cx, cy, origin_x, origin_y, size),
             small
         )
     for cx, cy in super_pacgums:
         pygame.draw.circle(
-            screen, SUPER_COLOUR,
+            screen, theme.PRIMARY,
             cell_center(cx, cy, origin_x, origin_y, size),
             big)

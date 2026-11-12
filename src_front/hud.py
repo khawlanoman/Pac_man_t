@@ -1,19 +1,12 @@
 """Draws the heads-up display: score, lives, level and timer."""
 
-from numpy import size
-
 import pygame
-import src_front.theme as theme
-import src_front.theme as sprites
+from src_front import sprites, theme
 
-TEXT = (234, 238, 252)
-MUTED = (128, 139, 176)
-DANGER = (255, 94, 94)
-PANEL = (16, 18, 30)
 
 FONT_PATH = "assets/fonts/game_font_1.TTF"
+CARD = pygame.Rect(16, 18, 688, 80)
 _fonts: dict[int, pygame.font.Font] = {}
-_fonts[size] = pygame.font.Font(FONT_PATH, size)
 
 
 def font(size: int) -> pygame.font.Font:
@@ -23,7 +16,7 @@ def font(size: int) -> pygame.font.Font:
     done inside the draw loop, so each size is created once and reused.
     """
     if size not in _fonts:
-        _fonts[size] = pygame.font.SysFont("dejavusansmono", size, bold=True)
+        _fonts[size] = pygame.font.Font(FONT_PATH, size)
     return _fonts[size]
 
 
@@ -53,6 +46,7 @@ def draw_label(screen: pygame.Surface, title: str, value: str,
             rect.left = x
         rect.top = y + offset
         screen.blit(surface, rect)
+
 
 def draw_lives(screen: pygame.Surface, lives: int, x: int, y: int) -> None:
     """Draw one small Pac-Man icon per remaining life."""
@@ -84,4 +78,4 @@ def draw_hud(screen: pygame.Surface, data: dict, total_levels: int) -> None:
     clock = f"{seconds // 60}:{seconds % 60:02d}"
     colour = theme.DANGER if seconds <= 10 else theme.TEXT
     draw_label(screen, "TIME", clock, CARD.right - 28, top,
-           align="right", colour=colour)
+                align="right", colour=colour)

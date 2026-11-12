@@ -10,11 +10,10 @@ from src_front import entities
 from src_front import hud
 from src_front import menu
 from src_front import theme
+from src_front import highscores
 
 WIDTH = 720
 HEIGHT = 800
-HUD_HEIGHT = 90
-BACKGROUND = theme.BG
 MAZE_X = 45
 MAZE_Y = 122
 CELL = 42
@@ -22,7 +21,7 @@ FPS = 60
 MENU = "menu"
 PLAYING = "playing"
 PAUSED = "paused"
-BACKGROUND = (8, 9, 16)
+BACKGROUND = theme.BG
 MOVEMENT_KEYS = {
     pygame.K_UP: "up",
     pygame.K_w: "up",
@@ -40,12 +39,13 @@ def run(config_path: str) -> None:
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Pac-Man")
+    pygame.display.set_icon(pygame.image.load("assets/sprites/pacman_1.png"))
     clock = pygame.time.Clock()
 
     # --- setup: build the level once, before the loop ---
     config = parsing.pars_config(config_path)
     level = config.levels[0]
-    maze = loader.load_maze(level.width,level.height, config.seed)
+    maze = loader.load_maze(level.width, level.height, config.seed)
     state = Game_state(maze, level.width, level.height, set(), set(), None,
                        [], 0, 0, config.level_max_time,
                        Game_status.PLAYING, False, {}, config, [])
@@ -56,6 +56,7 @@ def run(config_path: str) -> None:
     running = True
     main_menu = menu.Menu(menu.MAIN_ITEMS, "PAC-MAN")
     pause_menu = menu.Menu(menu.PAUSE_ITEMS, "PAUSED")
+    scores = highscores.load(config.highscore_filename)
     current = MENU
 
     while running:
@@ -79,6 +80,10 @@ def run(config_path: str) -> None:
                     if event.key == pygame.K_ESCAPE:
                         pause_menu.index = 0
                         current = PAUSED
+                    elif event.key == pygame.K_c:
+                        state.cheat_skip_level()
+                    elif event.key == pygame.K_l:
+                        state.cheat_add_lives()
                     else:
                         direction = MOVEMENT_KEYS.get(event.key)
                         if direction is not None:
@@ -106,23 +111,21 @@ def run(config_path: str) -> None:
                 state.move_ghosts(dt)
                 state.check_ghost_collision()
                 state.check_level_complete()
-            # state.move_player(dt)
-            # state.check_pacgum_at_player()
-            # state.update_ghosts_time(dt)
-            # state.move_ghosts(dt)
-            # # game_state.ghosts_ai()
-            # state.check_ghost_collision()
-            # state.check_level_complete()
         # --- draw
         screen.fill(BACKGROUND)
 
         if current == MENU:
+            data = state.all_data_to_dict()
+            maze_view.draw_maze(screen, data["maze"], 45, 85, 42,
+                                theme.FAINT_WALL, theme.FAINT_WALL)
             main_menu.draw(screen)
+            menu.draw_tagline(screen)
+            menu.draw_parade(screen)
+            menu.draw_leaderboard(screen, scores)
+            menu.draw_hint(screen)
         else:
             data = state.all_data_to_dict()
             player = data["player"]
-            flashing = (player["power_time"] <= 2.0 and
-                        int(elapsed * 6) % 2 == 0)
 
             maze_view.draw_maze(screen, data["maze"], MAZE_X, MAZE_Y, CELL)
             maze_view.draw_pacgums(screen, data["pacgums"],
@@ -130,6 +133,8 @@ def run(config_path: str) -> None:
                                    MAZE_X, MAZE_Y, CELL)
 
             for ghost in data["ghosts"]:
+                flashing = (ghost.get("ghost_freaid", 99.0) <= 2.0
+                            and int(elapsed * 6) % 2 == 0)
                 entities.draw_ghost(screen, ghost, flashing, MAZE_X, MAZE_Y,
                                     CELL)
             entities.draw_player(screen, player, elapsed, MAZE_X, MAZE_Y,
