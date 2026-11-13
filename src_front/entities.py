@@ -5,18 +5,8 @@ import pygame
 
 from src_front import sprites
 
-PLAYER_COLOUR = (255, 214, 0)
 MOUTH_FPS = 10
 
-GHOST_COLOURS = {
-    "blinky": (255, 74, 74),
-    "pinky": (255, 146, 205),
-    "inky": (76, 221, 237),
-    "clyde": (255, 168, 62),
-}
-
-GHOST_FRIGHTENED = (46, 68, 214)
-EYE_WHITE = (248, 250, 255)
 SPRITE_SCALE_PLAYER = 0.7
 SPRITE_SCALE_GHOSTS = 0.85
 
