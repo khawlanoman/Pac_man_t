@@ -11,6 +11,8 @@ from src_front import hud
 from src_front import menu
 from src_front import theme
 from src_front import highscores
+from src_front import screens
+from src_front import endscreen
 
 WIDTH = 720
 HEIGHT = 800
@@ -21,6 +23,9 @@ FPS = 60
 MENU = "menu"
 PLAYING = "playing"
 PAUSED = "paused"
+HELP = "help"
+SCORES = "scores"
+END = "end"
 BACKGROUND = theme.BG
 MOVEMENT_KEYS = {
     pygame.K_UP: "up",
@@ -56,6 +61,7 @@ def run(config_path: str) -> None:
     running = True
     main_menu = menu.Menu(menu.MAIN_ITEMS, "PAC-MAN")
     pause_menu = menu.Menu(menu.PAUSE_ITEMS, "PAUSED")
+    end_screen = endscreen.EndScreen()
     scores = highscores.load(config.highscore_filename)
     current = MENU
 
@@ -72,6 +78,10 @@ def run(config_path: str) -> None:
                 if action == "start":
                     state.initialize_level()
                     current = PLAYING
+                elif action == "help":
+                    current = HELP
+                elif action == "scores":
+                    current = SCORES
                 elif action == "quit":
                     running = False
 
@@ -98,10 +108,26 @@ def run(config_path: str) -> None:
                 elif action == "quit":
                     running = False
 
+            elif current in (HELP, SCORES):
+                if event.type == pygame.KEYDOWN and event.key in (
+                    pygame.K_ESCAPE, pygame.K_RETURN):
+                    current = MENU
+                elif (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1):
+                    current = MENU
+
+            elif current == END:
+                if end_screen.handle_event(event):
+                    scores = highscores.add(scores, end_screen.name, end_screen.score)
+                    highscores.save(config.highscore_filename, scores)
+                    current = MENU
+
         # --- update
         if current == PLAYING:
-            if state.game_status == Game_status.GAME_OVER:
-                current = MENU      # or show a game over screen
+            if state.game_status in (Game_status.GAME_OVER,
+                                     Game_status.VICTORY):
+                end_screen.start(state.game_status == Game_status.VICTORY,
+                                 state.score)
+                current = END
             else:
                 elapsed += dt
                 state.update_timers(dt)
@@ -123,6 +149,10 @@ def run(config_path: str) -> None:
             menu.draw_parade(screen)
             menu.draw_leaderboard(screen, scores)
             menu.draw_hint(screen)
+        elif current == HELP:
+            screens.draw_help(screen)
+        elif current == SCORES:
+            screens.draw_scores(screen, scores)
         else:
             data = state.all_data_to_dict()
             player = data["player"]
@@ -143,6 +173,9 @@ def run(config_path: str) -> None:
             if current == PAUSED:
                 menu.dim(screen)
                 pause_menu.draw(screen)
+            elif current == END:
+                menu.dim(screen)
+                end_screen.draw(screen)
         pygame.display.flip()
 
     pygame.quit()
