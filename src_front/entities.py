@@ -53,7 +53,7 @@ def draw_ghost(screen: pygame.Surface, ghost: dict, flashing: bool,
                origin_x: int, origin_y: int, size: int) -> None:
     """Draw one ghost sprite for its current state."""
     state = ghost["state"]
-    if state == "eaten":
+    if state in ("eaten", "waiting"):
         name = "ghost_eaten"
     elif state == "frightened":
         name = "ghost_flash" if flashing else "ghost_frightened"
