@@ -6,29 +6,26 @@ import pygame
 
 SPRITE_DIR = os.path.join("assets", "sprites")
 
-_cashe: dict[tuple[str, int], pygame.Surface] = {}
+_cache: dict[tuple[str, int], pygame.Surface] = {}
 
 
 def load(name: str, size: int) -> pygame.Surface:
-    """Return a sprite scaled to `size` pixels square.
-
-    Images are loaded and scaled once, then cached. Scaling inside the
-    draw loop would redo this work 60 times a second.
-
-    Args:
-        name: File name without extension, e.g. "pacman_0".
-        size: Target width and height in pixels.
-
-    Returns:
-        The scaled surface, with transparency preserved.
-    """
-
+    """Return the sprite scaled to size, or a placeholder if it is missing."""
     key = (name, size)
-    if key in _cashe:
-        return _cashe[key]
+    if key not in _cache:
+        try:
+            image = pygame.image.load(f"assets/sprites/{name}.png")
+            image = pygame.transform.smoothscale(image.convert_alpha(),
+                                                 (size, size))
+        except (pygame.error, OSError):
+            image = _placeholder(size)
+        _cache[key] = image
+    return _cache[key]
 
-    path = os.path.join(SPRITE_DIR, f"{name}.png")
-    image = pygame.image.load(path).convert_alpha()
-    scaled = pygame.transform.scale(image, (size, size))
-    _cashe[key] = scaled
-    return scaled
+
+def _placeholder(size: int) -> pygame.Surface:
+    """Return a pink circle, so a missing sprite is visible but harmless."""
+    image = pygame.Surface((size, size), pygame.SRCALPHA)
+    pygame.draw.circle(image, (255, 0, 255), (size // 2, size // 2),
+                       size // 2)
+    return image

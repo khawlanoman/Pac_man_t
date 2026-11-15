@@ -16,7 +16,10 @@ def font(size: int) -> pygame.font.Font:
     done inside the draw loop, so each size is created once and reused.
     """
     if size not in _fonts:
-        _fonts[size] = pygame.font.Font(FONT_PATH, size)
+        try:
+            _fonts[size] = pygame.font.Font(FONT_PATH, size)
+        except (pygame.error, OSError):
+            _fonts[size] = pygame.font.Font(None, size)
     return _fonts[size]
 
 

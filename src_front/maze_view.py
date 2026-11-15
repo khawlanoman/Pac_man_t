@@ -4,6 +4,7 @@ import pygame
 from src_front import theme
 
 WALL_WIDTH = 4
+MAX_CELL = 42
 
 
 def draw_cell(screen: pygame.Surface, mask: int, x: int, y: int, size: int,
@@ -65,6 +66,24 @@ def cell_center(cx: int, cy: int, origin_X: int, origin_Y: int,
     """Return the pixel at the centre of cell (cx, cy)."""
     return (origin_X + cx * size + size // 2,
             origin_Y + cy * size + size // 2)
+
+
+def layout(cols: int, rows: int,
+           area: pygame.Rect) -> tuple[int, int, int]:
+    """Fit a maze of cols x rows cells, centred, inside area.
+
+    Args:
+        cols: Number of cells across.
+        rows: Number of cells down.
+        area: The free space the maze may use.
+
+    Returns:
+        The maze's left x, top y, and cell size in pixels.
+    """
+    cell = min(MAX_CELL, area.width // cols, area.height // rows)
+    origin_x = area.centerx - cell * cols // 2
+    origin_y = area.centery - cell * rows // 2
+    return origin_x, origin_y, cell
 
 
 def draw_pacgums(screen: pygame.Surface,

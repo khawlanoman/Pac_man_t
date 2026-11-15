@@ -17,9 +17,8 @@ from src_front import sound
 
 WIDTH = 720
 HEIGHT = 800
-MAZE_X = 45
-MAZE_Y = 122
-CELL = 42
+GAME_AREA = pygame.Rect(16, 110, 688, 674)
+MENU_AREA = pygame.Rect(0, 0, 720, 800)
 FPS = 60
 MENU = "menu"
 PLAYING = "playing"
@@ -56,7 +55,10 @@ def run(config_path: str) -> None:
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Pac-Man")
-    pygame.display.set_icon(pygame.image.load("assets/sprites/pacman_1.png"))
+    try:
+        pygame.display.set_icon(pygame.image.load("assets/sprites/pacman_1.png"))
+    except (pygame.error, OSError):
+        pass
     sound.init()
     sound.start_music()
     clock = pygame.time.Clock()
@@ -177,7 +179,9 @@ def run(config_path: str) -> None:
 
         if current == MENU:
             data = state.all_data_to_dict()
-            maze_view.draw_maze(screen, data["maze"], 45, 85, 42,
+            ox, oy, cell = maze_view.layout(len(data["maze"][0]),
+                                            len(data["maze"]), MENU_AREA)
+            maze_view.draw_maze(screen, data["maze"], ox, oy, cell,
                                 theme.FAINT_WALL, theme.FAINT_WALL)
             main_menu.draw(screen)
             menu.draw_tagline(screen)
@@ -191,19 +195,21 @@ def run(config_path: str) -> None:
         else:
             data = state.all_data_to_dict()
             player = data["player"]
+            ox, oy, cell = maze_view.layout(len(data["maze"][0]),
+                                            len(data["maze"]), GAME_AREA)
 
-            maze_view.draw_maze(screen, data["maze"], MAZE_X, MAZE_Y, CELL)
+            maze_view.draw_maze(screen, data["maze"], ox, oy, cell)
             maze_view.draw_pacgums(screen, data["pacgums"],
                                    data["super_pacgums"],
-                                   MAZE_X, MAZE_Y, CELL)
+                                   ox, oy, cell)
 
             for ghost in data["ghosts"]:
                 flashing = (ghost.get("ghost_freaid", 99.0) <= 2.0
                             and int(elapsed * 6) % 2 == 0)
-                entities.draw_ghost(screen, ghost, flashing, MAZE_X, MAZE_Y,
-                                    CELL)
-            entities.draw_player(screen, player, elapsed, MAZE_X, MAZE_Y,
-                                 CELL)
+                entities.draw_ghost(screen, ghost, flashing, ox, oy,
+                                    cell)
+            entities.draw_player(screen, player, elapsed, ox, oy,
+                                 cell)
             hud.draw_hud(screen, data, len(config.levels))
             if current == PAUSED:
                 menu.dim(screen)
