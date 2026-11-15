@@ -14,11 +14,6 @@ MAIN_ITEMS = [
     ("QUIT", "quit"),
 ]
 
-PAUSE_ITEMS = [
-    ("RESUME", "resume"),
-    ("MAIN MENU", "menu"),
-    ("QUIT", "quit"),
-]
 
 
 def dim(screen: pygame.Surface, alpha: int = 190) -> None:
@@ -31,6 +26,35 @@ def dim(screen: pygame.Surface, alpha: int = 190) -> None:
     veil = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
     veil.fill((6, 7, 12, alpha))
     screen.blit(veil, (0, 0))
+
+PAUSE_PANEL = pygame.Rect(0, 0, 440, 480)
+
+
+def draw_pause_panel(screen: pygame.Surface, score: int, level: int,
+                        total_levels: int) -> None:
+    """Draw the rounded card behind the pause menu.
+
+    Args:
+        screen: Surface to draw on.
+        score: Current score.
+        level: Current level, counted from 1.
+        total_levels: How many levels the config defines.
+    """
+    panel = PAUSE_PANEL.copy()
+    panel.center = screen.get_rect().center
+    pygame.draw.rect(screen, theme.SURFACE, panel,
+                     border_radius=theme.RADIUS_PANEL)
+    pygame.draw.rect(screen, theme.BORDER, panel, width=theme.BORDER_WIDTH,
+                     border_radius=theme.RADIUS_PANEL)
+
+    info = hud.font(9).render(
+        f"Score: {score} - Level: {level}/{total_levels}", True, theme.MUTED
+    )
+    screen.blit(info, info.get_rect(center=(panel.centerx, panel.top + 105)))
+
+    hint = hud.font(8).render("ESC TO RESUME", True, theme.MUTED)
+    screen.blit(hint, hint.get_rect(center=(panel.centerx, panel.bottom - 32)))
+
 
 def draw_tagline(screen: pygame.Surface) -> None:
     """Draw the line under the title."""
@@ -84,12 +108,23 @@ def draw_hint(screen: pygame.Surface) -> None:
     screen.blit(text, text.get_rect(center=(screen.get_width() // 2, 760)))
 
 
+def pause_items(music_on: bool, effects_on: bool) -> list[tuple[str, str]]:
+    """Build the pause menu, showing the current sound settings."""
+    return [
+        ("RESUME", "resume"),
+        (f"MUSIC: {'ON' if music_on else 'OFF'}", "music"),
+        (f"SOUND: {'ON' if effects_on else 'OFF'}", "effects"),
+        ("MAIN MENU", "menu"),
+        ("QUIT", "quit"),
+    ]
+
+
 
 class Menu:
     """A menu driven by both keyboard and mouse."""
 
     def __init__(self, items: list[tuple[str, str]], title: str,
-             title_y: int = 124, items_y: int = 322) -> None:
+             title_y: int = 124, items_y: int = 322, title_size=56) -> None:
         """Build a menu.
 
         Args:
@@ -104,6 +139,7 @@ class Menu:
         self.items_y = items_y
         self.index = 0
         self.rects: list[pygame.Rect] = []
+        self.title_size = title_size
 
     def handle_event(self, event: pygame.event.Event) -> str | None:
         """Translate one event into an action name.
@@ -153,7 +189,7 @@ class Menu:
         center = screen.get_width() // 2
         self.rects = []
 
-        title_font = hud.font(56)
+        title_font = hud.font(self.title_size)
         shadow = title_font.render(self.title, True, theme.SHADOW)
         title = title_font.render(self.title, True, theme.PRIMARY)
         pos = title.get_rect(center=(center, self.title_y))

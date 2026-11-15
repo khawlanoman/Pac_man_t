@@ -13,6 +13,7 @@ from src_front import theme
 from src_front import highscores
 from src_front import screens
 from src_front import endscreen
+from src_front import sound
 
 WIDTH = 720
 HEIGHT = 800
@@ -39,12 +40,25 @@ MOVEMENT_KEYS = {
 }
 
 
+def sound_snapshot(state: Game_state) -> dict:
+    """Collect the numbers that sound effects react to."""
+    return {
+        "lives": state.player.lives,
+        "pacgums": len(state.pacgums),
+        "supers": len(state.super_pacgums),
+        "ghosts_home": sum(g.state.value in ("eaten", "waiting")
+                           for g in state.ghosts),
+    }
+
+
 def run(config_path: str) -> None:
     """Open the window and keep it open until the user closes it."""
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Pac-Man")
     pygame.display.set_icon(pygame.image.load("assets/sprites/pacman_1.png"))
+    sound.init()
+    sound.start_music()
     clock = pygame.time.Clock()
 
     # --- setup: build the level once, before the loop ---
@@ -60,7 +74,8 @@ def run(config_path: str) -> None:
 
     running = True
     main_menu = menu.Menu(menu.MAIN_ITEMS, "PAC-MAN")
-    pause_menu = menu.Menu(menu.PAUSE_ITEMS, "PAUSED")
+    pause_menu = menu.Menu(menu.pause_items(True, True), "PAUSED",
+                           title_y=220, items_y=325, title_size=32)
     end_screen = endscreen.EndScreen()
     scores = highscores.load(config.highscore_filename)
     current = MENU
@@ -74,7 +89,12 @@ def run(config_path: str) -> None:
                 running = False
 
             elif current == MENU:
+                old = main_menu.index
                 action = main_menu.handle_event(event)
+                if main_menu.index != old:
+                    sound.play("move")
+                if action:
+                    sound.play("select")
                 if action == "start":
                     state.initialize_level()
                     current = PLAYING
@@ -100,13 +120,22 @@ def run(config_path: str) -> None:
                             state.handle_input(direction)
 
             elif current == PAUSED:
-                action = pause_menu.handle_event(event)
-                if action == "resume":
+                if (event.type == pygame.KEYDOWN
+                        and event.key == pygame.K_ESCAPE):
                     current = PLAYING
-                elif action == "menu":
-                    current = MENU
-                elif action == "quit":
-                    running = False
+                else:
+                    action = pause_menu.handle_event(event)
+                    if action == "resume":
+                        current = PLAYING
+                    elif action in ("music", "effects"):
+                        sound.toggle(action)
+                        pause_menu.items = menu.pause_items(
+                            sound.SETTINGS["music"], sound.SETTINGS["effects"]
+                        )
+                    elif action == "menu":
+                        current = MENU
+                    elif action == "quit":
+                        running = False
 
             elif current in (HELP, SCORES):
                 if event.type == pygame.KEYDOWN and event.key in (
@@ -129,6 +158,7 @@ def run(config_path: str) -> None:
                                  state.score)
                 current = END
             else:
+                before = sound_snapshot(state)
                 elapsed += dt
                 state.update_timers(dt)
                 state.update_ghosts_time(dt)
@@ -137,6 +167,11 @@ def run(config_path: str) -> None:
                 state.move_ghosts(dt)
                 state.check_ghost_collision()
                 state.check_level_complete()
+                sound.react(before, sound_snapshot(state))
+        frightened = current == PLAYING and any(
+            g.state.value == "frightened" for g in state.ghosts
+        )
+        sound.set_chase(frightened)
         # --- draw
         screen.fill(BACKGROUND)
 
@@ -172,6 +207,8 @@ def run(config_path: str) -> None:
             hud.draw_hud(screen, data, len(config.levels))
             if current == PAUSED:
                 menu.dim(screen)
+                menu.draw_pause_panel(screen, data["score"],
+                                      data["level"] + 1, len(config.levels))
                 pause_menu.draw(screen)
             elif current == END:
                 menu.dim(screen)
