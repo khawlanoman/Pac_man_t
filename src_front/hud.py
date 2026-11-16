@@ -81,4 +81,4 @@ def draw_hud(screen: pygame.Surface, data: dict, total_levels: int) -> None:
     clock = f"{seconds // 60}:{seconds % 60:02d}"
     colour = theme.DANGER if seconds <= 10 else theme.TEXT
     draw_label(screen, "TIME", clock, CARD.right - 28, top,
-                align="right", colour=colour)
+               align="right", colour=colour)

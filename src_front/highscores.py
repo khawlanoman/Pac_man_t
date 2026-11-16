@@ -2,6 +2,7 @@
 
 import json
 import os
+from typing import Any
 
 MAX_NAME = 10
 MAX_ENTRIES = 10
@@ -49,7 +50,7 @@ def load(path: str) -> list[dict]:
     if not isinstance(raw, list):
         return []
 
-    entries = []
+    entries: list[dict[str, Any]] = []
     for row in raw:
         if not isinstance(row, dict):
             continue
@@ -104,4 +105,3 @@ def qualifies(entries: list[dict], score: int) -> bool:
     if len(entries) < MAX_ENTRIES:
         return True
     return score > entries[-1]["score"]
-

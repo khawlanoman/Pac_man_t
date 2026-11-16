@@ -42,29 +42,32 @@ class EndScreen:
         accent = theme.SUCCESS if self.won else theme.DANGER
 
         pygame.draw.rect(screen, theme.SURFACE, panel,
-                            border_radius=theme.RADIUS_PANEL)
+                         border_radius=theme.RADIUS_PANEL)
         pygame.draw.rect(screen, accent, panel, width=2,
-                            border_radius=theme.RADIUS_PANEL)
+                         border_radius=theme.RADIUS_PANEL)
 
         title = "YOU WON!" if self.won else "GAME OVER"
         sub = "CONGRATULATIONS!" if self.won else "BETTER LUCK NEXT TIME!"
         self._text(screen, title, 34, accent, cx, panel.top + 66)
         self._text(screen, sub, 9, theme.TEXT, cx, panel.top + 108)
         self._text(screen, "FINAL SCORE", 9, theme.MUTED, cx, panel.top + 145)
-        self._text(screen, str(self.score), 40, theme.PRIMARY, cx, panel.top + 190)
-        self._text(screen, "ENTER YOUR NAME", 9, theme.MUTED, cx, panel.top + 250)
+        self._text(screen, str(self.score), 40, theme.PRIMARY, cx,
+                   panel.top + 190)
+        self._text(screen, "ENTER YOUR NAME", 9, theme.MUTED, cx,
+                   panel.top + 250)
 
         field = FIELD.copy()
         field.center = (cx, panel.top + 305)
         pill = field.height // 2
         pygame.draw.rect(screen, theme.BG, field, border_radius=pill)
         pygame.draw.rect(screen, theme.PRIMARY, field, width=2,
-                            border_radius=pill)
+                         border_radius=pill)
 
         blink = "_" if pygame.time.get_ticks() // 500 % 2 == 0 else " "
-        self._text(screen, self.name + blink, 20, theme.TEXT, cx, field.centery)
-        self._text(screen, "ENTER - SAVE", 8, theme.MUTED, cx, panel.bottom - 36)
-
+        self._text(screen, self.name + blink, 20, theme.TEXT, cx,
+                   field.centery)
+        self._text(screen, "ENTER - SAVE", 8, theme.MUTED, cx,
+                   panel.bottom - 36)
 
     def _text(self, screen: pygame.Surface, text: str, size: int,
               colour: tuple[int, int, int], x: int, y: int) -> None:

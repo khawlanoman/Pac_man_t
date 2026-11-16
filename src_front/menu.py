@@ -3,7 +3,6 @@
 import pygame
 
 from src_front import hud
-from src_front import hud
 from src_front import sprites
 from src_front import theme
 
@@ -13,7 +12,6 @@ MAIN_ITEMS = [
     ("INSTRUCTIONS", "help"),
     ("QUIT", "quit"),
 ]
-
 
 
 def dim(screen: pygame.Surface, alpha: int = 190) -> None:
@@ -27,11 +25,12 @@ def dim(screen: pygame.Surface, alpha: int = 190) -> None:
     veil.fill((6, 7, 12, alpha))
     screen.blit(veil, (0, 0))
 
+
 PAUSE_PANEL = pygame.Rect(0, 0, 440, 480)
 
 
 def draw_pause_panel(screen: pygame.Surface, score: int, level: int,
-                        total_levels: int) -> None:
+                     total_levels: int) -> None:
     """Draw the rounded card behind the pause menu.
 
     Args:
@@ -80,8 +79,10 @@ def draw_leaderboard(screen: pygame.Surface, scores: list[dict]) -> None:
     """
     card = pygame.Rect(0, 530, 360, 136)
     card.centerx = screen.get_width() // 2
-    pygame.draw.rect(screen, theme.SURFACE, card, border_radius=theme.RADIUS_PANEL)
-    pygame.draw.rect(screen, theme.BORDER, card, width=theme.BORDER_WIDTH, border_radius=theme.RADIUS_PANEL)
+    pygame.draw.rect(screen, theme.SURFACE, card,
+                     border_radius=theme.RADIUS_PANEL)
+    pygame.draw.rect(screen, theme.BORDER, card, width=theme.BORDER_WIDTH,
+                     border_radius=theme.RADIUS_PANEL)
     head = hud.font(9).render("BEST", True, theme.MUTED)
     screen.blit(head, head.get_rect(center=(card.centerx, card.top + 26)))
 
@@ -101,10 +102,10 @@ def draw_leaderboard(screen: pygame.Surface, scores: list[dict]) -> None:
         screen.blit(score, score.get_rect(topright=(card.right - 30, y)))
 
 
-
 def draw_hint(screen: pygame.Surface) -> None:
     """draw the controls reminder at the bottom"""
-    text = hud.font(8).render("ARROWS / MOUSE - ENTER - Q TO QUIT", True, theme.MUTED)
+    text = hud.font(8).render("ARROWS / MOUSE - ENTER - Q TO QUIT", True,
+                              theme.MUTED)
     screen.blit(text, text.get_rect(center=(screen.get_width() // 2, 760)))
 
 
@@ -119,12 +120,12 @@ def pause_items(music_on: bool, effects_on: bool) -> list[tuple[str, str]]:
     ]
 
 
-
 class Menu:
     """A menu driven by both keyboard and mouse."""
 
     def __init__(self, items: list[tuple[str, str]], title: str,
-             title_y: int = 124, items_y: int = 322, title_size=56) -> None:
+                 title_y: int = 124, items_y: int = 322,
+                 title_size=56) -> None:
         """Build a menu.
 
         Args:

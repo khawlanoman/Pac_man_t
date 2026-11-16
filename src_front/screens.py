@@ -22,11 +22,13 @@ RULES = [
 ]
 
 
-
 def draw_panel(screen: pygame.Surface, title: str) -> None:
     """Draw the rounded card with its title and the back hint."""
-    pygame.draw.rect(screen, theme.SURFACE, PANEL, border_radius=theme.RADIUS_PANEL)
-    pygame.draw.rect(screen, theme.BORDER, PANEL, width=theme.BORDER_WIDTH, border_radius=theme.RADIUS_PANEL)
+    pygame.draw.rect(screen, theme.SURFACE, PANEL,
+                     border_radius=theme.RADIUS_PANEL)
+    pygame.draw.rect(screen, theme.BORDER, PANEL,
+                     width=theme.BORDER_WIDTH,
+                     border_radius=theme.RADIUS_PANEL)
 
     text = hud.font(32).render(title, True, theme.PRIMARY)
     shadow = hud.font(32).render(title, True, theme.SHADOW)
@@ -62,7 +64,7 @@ def draw_help(screen: pygame.Surface) -> None:
         screen.blit(hud.font(10).render(rule, True, theme.TEXT), (left, y))
         y += 28
 
-    
+
 def draw_scores(screen: pygame.Surface, scores: list[dict]) -> None:
     """Draw the top 10 scores, best first.
 

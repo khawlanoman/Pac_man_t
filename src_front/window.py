@@ -14,6 +14,7 @@ from src_front import highscores
 from src_front import screens
 from src_front import endscreen
 from src_front import sound
+from src_back.game.player import PlayerState
 
 WIDTH = 720
 HEIGHT = 800
@@ -39,7 +40,7 @@ MOVEMENT_KEYS = {
 }
 
 
-def sound_snapshot(state: Game_state) -> dict:
+def sound_snapshot(state: Game_state) -> dict[str, int]:
     """Collect the numbers that sound effects react to."""
     return {
         "lives": state.player.lives,
@@ -56,7 +57,8 @@ def run(config_path: str) -> None:
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Pac-Man")
     try:
-        pygame.display.set_icon(pygame.image.load("assets/sprites/pacman_1.png"))
+        pygame.display.set_icon(
+            pygame.image.load("assets/sprites/pacman_1.png"))
     except (pygame.error, OSError):
         pass
     sound.init()
@@ -67,7 +69,8 @@ def run(config_path: str) -> None:
     config = parsing.pars_config(config_path)
     level = config.levels[0]
     maze = loader.load_maze(level.width, level.height, config.seed)
-    state = Game_state(maze, level.width, level.height, set(), set(), None,
+    state = Game_state(maze, level.width, level.height, set(), set(),
+                       PlayerState(),
                        [], 0, 0, config.level_max_time,
                        Game_status.PLAYING, False, {}, config, [])
     state.initialize_level()
@@ -98,6 +101,8 @@ def run(config_path: str) -> None:
                 if action:
                     sound.play("select")
                 if action == "start":
+                    state.score = 0
+                    state.level = 0
                     state.initialize_level()
                     current = PLAYING
                 elif action == "help":
@@ -126,7 +131,12 @@ def run(config_path: str) -> None:
                         and event.key == pygame.K_ESCAPE):
                     current = PLAYING
                 else:
+                    old = pause_menu.index
                     action = pause_menu.handle_event(event)
+                    if pause_menu.index != old:
+                        sound.play("move")
+                    if action:
+                        sound.play("select")
                     if action == "resume":
                         current = PLAYING
                     elif action in ("music", "effects"):
@@ -140,15 +150,17 @@ def run(config_path: str) -> None:
                         running = False
 
             elif current in (HELP, SCORES):
-                if event.type == pygame.KEYDOWN and event.key in (
-                    pygame.K_ESCAPE, pygame.K_RETURN):
+                if (event.type == pygame.KEYDOWN
+                        and event.key in (pygame.K_ESCAPE, pygame.K_RETURN)):
                     current = MENU
-                elif (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1):
+                elif (event.type == pygame.MOUSEBUTTONDOWN
+                      and event.button == 1):
                     current = MENU
 
             elif current == END:
                 if end_screen.handle_event(event):
-                    scores = highscores.add(scores, end_screen.name, end_screen.score)
+                    scores = highscores.add(scores, end_screen.name,
+                                            end_screen.score)
                     highscores.save(config.highscore_filename, scores)
                     current = MENU
 
