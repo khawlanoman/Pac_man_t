@@ -3,6 +3,7 @@
 
 import argparse
 from src_front import window
+import sys
 
 
 def parse_args():
@@ -15,7 +16,11 @@ def parse_args():
 def main() -> None:
     """Run the game."""
     args = parse_args()
-    window.run(args.config)
+    try:
+        window.run(args.config)
+    except Exception as error:
+        print(f"pac-man: {type(error).__name__}: {error}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

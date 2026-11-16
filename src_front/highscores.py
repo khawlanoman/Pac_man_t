@@ -67,21 +67,17 @@ def load(path: str) -> list[dict]:
 
 
 def save(path: str, entries: list[dict]) -> bool:
-    """Write the table to disk.
-
-    Args:
-        path: Path to the JSON file.
-        entries: The entries to store.
+    """Write the table to disk, creating its folder if needed.
 
     Returns:
-        True on success. Failure is reported, never raised.
+        True on success, False if the file could not be written.
     """
     try:
         folder = os.path.dirname(path)
         if folder:
             os.makedirs(folder, exist_ok=True)
-        with open(path, "w", encoding="utf-8") as handle:
-            json.dump(entries, handle, indent=2)
+        with open(path, "w", encoding="utf-8") as file:
+            json.dump(entries, file, indent=2)
     except OSError:
         return False
     return True
