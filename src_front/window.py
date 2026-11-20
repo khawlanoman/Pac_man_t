@@ -21,6 +21,8 @@ HEIGHT = 800
 GAME_AREA = pygame.Rect(16, 110, 688, 674)
 MENU_AREA = pygame.Rect(0, 0, 720, 800)
 FPS = 60
+PLAYER_SPEED = 5.0
+TURBO_SPEED = 9.0
 MENU = "menu"
 PLAYING = "playing"
 PAUSED = "paused"
@@ -51,6 +53,22 @@ def sound_snapshot(state: Game_state) -> dict[str, int]:
     }
 
 
+def toggle_cheat(state: Game_state, name: str) -> None:
+    """Switch one cheat on or off and mark the game as cheated."""
+    state.cheats[name] = not state.cheats.get(name, False)
+    state.cheat_mode = True
+
+
+def toggle_sound(kind: str, main_menu: menu.Menu,
+                 pause_menu: menu.Menu) -> None:
+    """Switch music or effects, and refresh the labels in both menus."""
+    sound.toggle(kind)
+    music = sound.SETTINGS["music"]
+    effects = sound.SETTINGS["effects"]
+    main_menu.items = menu.main_items(music, effects)
+    pause_menu.items = menu.pause_items(music, effects)
+
+
 def run(config_path: str) -> None:
     """Open the window and keep it open until the user closes it."""
     pygame.init()
@@ -78,7 +96,7 @@ def run(config_path: str) -> None:
     elapsed = 0.0
 
     running = True
-    main_menu = menu.Menu(menu.MAIN_ITEMS, "PAC-MAN")
+    main_menu = menu.Menu(menu.main_items(True, True), "PAC-MAN")
     pause_menu = menu.Menu(menu.pause_items(True, True), "PAUSED",
                            title_y=220, items_y=325, title_size=32)
     end_screen = endscreen.EndScreen()
@@ -103,10 +121,14 @@ def run(config_path: str) -> None:
                 if action == "start":
                     state.score = 0
                     state.level = 0
+                    state.cheat_mode = False
+                    state.cheats.clear()
                     state.initialize_level()
                     current = PLAYING
                 elif action == "help":
                     current = HELP
+                elif action in ("music", "effects"):
+                    toggle_sound(action, main_menu, pause_menu)
                 elif action == "scores":
                     current = SCORES
                 elif action == "quit":
@@ -119,8 +141,14 @@ def run(config_path: str) -> None:
                         current = PAUSED
                     elif event.key == pygame.K_c:
                         state.cheat_skip_level()
+                        state.cheat_mode = True
                     elif event.key == pygame.K_l:
                         state.cheat_add_lives()
+                        state.cheat_mode = True
+                    elif event.key == pygame.K_f:
+                        toggle_cheat(state, "freeze")
+                    elif event.key == pygame.K_t:
+                        toggle_cheat(state, "turbo")
                     else:
                         direction = MOVEMENT_KEYS.get(event.key)
                         if direction is not None:
@@ -140,10 +168,7 @@ def run(config_path: str) -> None:
                     if action == "resume":
                         current = PLAYING
                     elif action in ("music", "effects"):
-                        sound.toggle(action)
-                        pause_menu.items = menu.pause_items(
-                            sound.SETTINGS["music"], sound.SETTINGS["effects"]
-                        )
+                        toggle_sound(action, main_menu, pause_menu)
                     elif action == "menu":
                         current = MENU
                     elif action == "quit":
@@ -166,6 +191,8 @@ def run(config_path: str) -> None:
 
         # --- update
         if current == PLAYING:
+            if state.level >= len(config.levels):
+                state.game_status = Game_status.VICTORY
             if state.game_status in (Game_status.GAME_OVER,
                                      Game_status.VICTORY):
                 end_screen.start(state.game_status == Game_status.VICTORY,
@@ -176,9 +203,12 @@ def run(config_path: str) -> None:
                 elapsed += dt
                 state.update_timers(dt)
                 state.update_ghosts_time(dt)
+                state.player.speed = (TURBO_SPEED if state.cheats.get("turbo")
+                                      else PLAYER_SPEED)
                 state.move_player(dt)
                 state.check_pacgum_at_player()
-                state.move_ghosts(dt)
+                if not state.cheats.get("freeze"):
+                    state.move_ghosts(dt)
                 state.check_ghost_collision()
                 state.check_level_complete()
                 sound.react(before, sound_snapshot(state))
@@ -226,7 +256,9 @@ def run(config_path: str) -> None:
             if current == PAUSED:
                 menu.dim(screen)
                 menu.draw_pause_panel(screen, data["score"],
-                                      data["level"] + 1, len(config.levels))
+                                      min(data["level"] + 1,
+                                          len(config.levels)),
+                                      len(config.levels))
                 pause_menu.draw(screen)
             elif current == END:
                 menu.dim(screen)

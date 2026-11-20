@@ -11,6 +11,8 @@ CONTROLS = [
     ("ESC", "PAUSE"),
     ("C", "SKIP LEVEL (CHEAT)"),
     ("L", "EXTRA LIFE (CHEAT)"),
+    ("F", "ON/OFF FREEZE GHOSTS (CHEAT)"),
+    ("T", "ON/OFF TURBO SPEED (CHEAT)"),
 ]
 
 RULES = [

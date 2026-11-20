@@ -7,6 +7,28 @@ from src_front import sprites, theme
 FONT_PATH = "assets/fonts/game_font_1.TTF"
 CARD = pygame.Rect(16, 18, 688, 80)
 _fonts: dict[int, pygame.font.Font] = {}
+MAX_LIFE_ICONS = 4
+
+
+def draw_lives(screen: pygame.Surface, lives: int, x: int, y: int) -> None:
+    """Draw up to four Pac-Man icons, then "+N" for any extra lives."""
+    icon = sprites.load("pacman_1", 22)
+    for i in range(min(lives, MAX_LIFE_ICONS)):
+        screen.blit(icon, (x + i * 30, y))
+    if lives > MAX_LIFE_ICONS:
+        extra = font(9).render(f"+{lives - MAX_LIFE_ICONS}", True,
+                               theme.MUTED)
+        screen.blit(extra, (x + MAX_LIFE_ICONS * 30, y + 6))
+
+
+def draw_cheat_badge(screen: pygame.Surface, label: str,
+                     x: int, y: int) -> None:
+    """Draw a small red pill with the given label, centred on (x, y)."""
+    text = font(8).render(label, True, theme.DANGER)
+    pill = text.get_rect(center=(x, y)).inflate(16, 10)
+    pygame.draw.rect(screen, theme.DANGER, pill, width=1,
+                     border_radius=pill.height // 2)
+    screen.blit(text, text.get_rect(center=pill.center))
 
 
 def font(size: int) -> pygame.font.Font:
@@ -51,13 +73,6 @@ def draw_label(screen: pygame.Surface, title: str, value: str,
         screen.blit(surface, rect)
 
 
-def draw_lives(screen: pygame.Surface, lives: int, x: int, y: int) -> None:
-    """Draw one small Pac-Man icon per remaining life."""
-    icon = sprites.load("pacman_1", 22)
-    for i in range(lives):
-        screen.blit(icon, (x + i * 30, y))
-
-
 def draw_hud(screen: pygame.Surface, data: dict, total_levels: int) -> None:
     """Draw the HUD as a floating rounded card at the top of the window.
 
@@ -74,7 +89,8 @@ def draw_hud(screen: pygame.Surface, data: dict, total_levels: int) -> None:
     top = CARD.top + 22
     draw_label(screen, "SCORE", str(data["score"]), CARD.left + 28, top)
     draw_lives(screen, data["player"]["lives"], CARD.left + 170, top + 8)
-    draw_label(screen, "LEVEL", f"{data['level'] + 1}/{total_levels}",
+    level = min(data["level"] + 1, total_levels)
+    draw_label(screen, "LEVEL", f"{level}/{total_levels}",
                CARD.left + 450, top, align="center")
 
     seconds = max(0, int(data["timer"] + 0.999))
@@ -82,3 +98,9 @@ def draw_hud(screen: pygame.Surface, data: dict, total_levels: int) -> None:
     colour = theme.DANGER if seconds <= 10 else theme.TEXT
     draw_label(screen, "TIME", clock, CARD.right - 28, top,
                align="right", colour=colour)
+
+    if data["cheat_mode"]:
+        active = [name[0].upper() for name, on in data["cheats"].items()
+                  if on]
+        label = " ".join(["CHEAT"] + active)
+        draw_cheat_badge(screen, label, CARD.left + 360, CARD.centery)

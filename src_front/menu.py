@@ -6,12 +6,17 @@ from src_front import hud
 from src_front import sprites
 from src_front import theme
 
-MAIN_ITEMS = [
-    ("START GAME", "start"),
-    ("HIGH SCORES", "scores"),
-    ("INSTRUCTIONS", "help"),
-    ("QUIT", "quit"),
-]
+
+def main_items(music_on: bool, effects_on: bool) -> list[tuple[str, str]]:
+    """Build the main menu, showing the current sound settings."""
+    return [
+        ("START GAME", "start"),
+        ("HIGH SCORES", "scores"),
+        ("INSTRUCTIONS", "help"),
+        (f"MUSIC: {'ON' if music_on else 'OFF'}", "music"),
+        (f"SOUND: {'ON' if effects_on else 'OFF'}", "effects"),
+        ("QUIT", "quit"),
+    ]
 
 
 def dim(screen: pygame.Surface, alpha: int = 190) -> None:
@@ -77,7 +82,7 @@ def draw_leaderboard(screen: pygame.Surface, scores: list[dict]) -> None:
         screen: Surface to draw on.
         scores: Entries from highscores.load(), best first.
     """
-    card = pygame.Rect(0, 530, 360, 136)
+    card = pygame.Rect(0, 600, 360, 136)
     card.centerx = screen.get_width() // 2
     pygame.draw.rect(screen, theme.SURFACE, card,
                      border_radius=theme.RADIUS_PANEL)
