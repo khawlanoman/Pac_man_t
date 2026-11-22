@@ -69,6 +69,21 @@ def toggle_sound(kind: str, main_menu: menu.Menu,
     pause_menu.items = menu.pause_items(music, effects)
 
 
+def load_level(state: Game_state) -> None:
+    """Build the maze for state.level from the config.
+
+    Temporary: the backend reuses the first maze on every level, so
+    the frontend rebuilds it whenever the level number changes.
+    """
+    size = state.config.levels[state.level]
+    state.width, state.height = size.width, size.height
+    state.maze = loader.load_maze(size.width, size.height,
+                                  state.config.seed + state.level)
+    lives = state.player.lives
+    state.initialize_level()
+    state.player.lives = lives
+
+
 def run(config_path: str) -> None:
     """Open the window and keep it open until the user closes it."""
     pygame.init()
@@ -94,6 +109,7 @@ def run(config_path: str) -> None:
     state.initialize_level()
 
     elapsed = 0.0
+    built_level = 0
 
     running = True
     main_menu = menu.Menu(menu.main_items(True, True), "PAC-MAN")
@@ -193,6 +209,9 @@ def run(config_path: str) -> None:
         if current == PLAYING:
             if state.level >= len(config.levels):
                 state.game_status = Game_status.VICTORY
+            elif state.level != built_level:
+                load_level(state)
+                built_level = state.level
             if state.game_status in (Game_status.GAME_OVER,
                                      Game_status.VICTORY):
                 end_screen.start(state.game_status == Game_status.VICTORY,

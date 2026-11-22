@@ -4,7 +4,7 @@ from .models import Game_config
 from argparse import Namespace
 
 
-def pars_config(Namespace: Namespace) :
+def pars_config(file: Namespace) :
 
     try:
         with open(file, "r") as file:
