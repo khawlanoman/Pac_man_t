@@ -15,7 +15,6 @@ EFFECTS = {
 }
 
 MUSIC_VOLUME = 0.4
-DUCKED_VOLUME = 0.15
 SETTINGS = {"music": True, "effects": True}
 
 _sounds: dict[str, pygame.mixer.Sound] = {}
@@ -73,7 +72,7 @@ def set_chase(on: bool) -> None:
     elif not on and playing:
         chase.stop()
         if SETTINGS["music"]:
-            pygame.mixer.music.unpause
+            pygame.mixer.music.unpause()
             if not pygame.mixer.music.get_busy():
                 start_music()
 
@@ -81,7 +80,7 @@ def set_chase(on: bool) -> None:
 def toggle(kind: str) -> None:
     """Switch "music" or "effects" on or off."""
     SETTINGS[kind] = not SETTINGS[kind]
-    if kind == "music" and pygame.mixer.get_init is not None:
+    if kind == "music" and pygame.mixer.get_init() is not None:
         if SETTINGS["music"]:
             pygame.mixer.music.unpause()
         else:

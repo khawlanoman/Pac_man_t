@@ -1,6 +1,6 @@
 PYTHON = python3 
 PIP = $(PYTHON) -m pip
-MAIN = main.py
+MAIN = pac-man.py
 
 all: run
 
