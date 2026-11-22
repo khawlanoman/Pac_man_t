@@ -4,7 +4,7 @@ import pygame
 from src_front import theme
 
 WALL_WIDTH = 4
-MAX_CELL = 42
+MAX_CELL = 64
 
 
 def draw_cell(screen: pygame.Surface, mask: int, x: int, y: int, size: int,

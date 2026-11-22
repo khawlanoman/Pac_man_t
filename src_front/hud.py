@@ -5,9 +5,13 @@ from src_front import sprites, theme
 
 
 FONT_PATH = "assets/fonts/game_font_1.TTF"
-CARD = pygame.Rect(16, 18, 688, 80)
 _fonts: dict[int, pygame.font.Font] = {}
 MAX_LIFE_ICONS = 4
+
+
+def card_rect(screen: pygame.Surface) -> pygame.Rect:
+    """The HUD card: full window width minus a 16 px margin each side."""
+    return pygame.Rect(16, 18, screen.get_width() - 32, 80)
 
 
 def draw_lives(screen: pygame.Surface, lives: int, x: int, y: int) -> None:
@@ -81,26 +85,27 @@ def draw_hud(screen: pygame.Surface, data: dict, total_levels: int) -> None:
         data: The snapshot from all_data_to_dict().
         total_levels: How many levels the config defines.
     """
-    pygame.draw.rect(screen, theme.SURFACE, CARD,
+    card = card_rect(screen)
+    pygame.draw.rect(screen, theme.SURFACE, card,
                      border_radius=theme.RADIUS_PANEL)
-    pygame.draw.rect(screen, theme.BORDER, CARD, width=theme.BORDER_WIDTH,
+    pygame.draw.rect(screen, theme.BORDER, card, width=theme.BORDER_WIDTH,
                      border_radius=theme.RADIUS_PANEL)
 
-    top = CARD.top + 22
-    draw_label(screen, "SCORE", str(data["score"]), CARD.left + 28, top)
-    draw_lives(screen, data["player"]["lives"], CARD.left + 170, top + 8)
+    top = card.top + 22
+    draw_label(screen, "SCORE", str(data["score"]), card.left + 28, top)
+    draw_lives(screen, data["player"]["lives"], card.left + 170, top + 8)
     level = min(data["level"] + 1, total_levels)
     draw_label(screen, "LEVEL", f"{level}/{total_levels}",
-               CARD.left + 450, top, align="center")
+               card.right + 238, top, align="center")
 
     seconds = max(0, int(data["timer"] + 0.999))
     clock = f"{seconds // 60}:{seconds % 60:02d}"
     colour = theme.DANGER if seconds <= 10 else theme.TEXT
-    draw_label(screen, "TIME", clock, CARD.right - 28, top,
+    draw_label(screen, "TIME", clock, card.right - 28, top,
                align="right", colour=colour)
 
     if data["cheat_mode"]:
         active = [name[0].upper() for name, on in data["cheats"].items()
                   if on]
         label = " ".join(["CHEAT"] + active)
-        draw_cheat_badge(screen, label, CARD.left + 360, CARD.centery)
+        draw_cheat_badge(screen, label, card.right - 328, card.centery)

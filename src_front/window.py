@@ -18,8 +18,6 @@ from src_back.game.player import PlayerState
 
 WIDTH = 720
 HEIGHT = 800
-GAME_AREA = pygame.Rect(16, 110, 688, 674)
-MENU_AREA = pygame.Rect(0, 0, 720, 800)
 FPS = 60
 PLAYER_SPEED = 5.0
 TURBO_SPEED = 9.0
@@ -84,10 +82,34 @@ def load_level(state: Game_state) -> None:
     state.player.lives = lives
 
 
+def ui_offset(screen: pygame.Surface) -> tuple[int, int]:
+    """Top-left corner that centres the 720 x 800 menu canvas."""
+    return ((screen.get_width() - WIDTH) // 2,
+            (screen.get_height() - HEIGHT) // 2)
+
+
+def to_ui(event: pygame.event.Event,
+          offset: tuple[int, int]) -> pygame.event.Event:
+    """Return the event with its mouse position moved onto the canvas."""
+    if not hasattr(event, "pos"):
+        return event
+    x, y = event.pos
+    data = dict(event.dict, pos=(x - offset[0], y - offset[1]))
+    return pygame.event.Event(event.type, data)
+
+
+def game_area(screen: pygame.Surface) -> pygame.Rect:
+    """The free space under the HUD card, for the maze."""
+    top = hud.card_rect(screen).bottom + 12
+    return pygame.Rect(16, top, screen.get_width() - 32,
+                       screen.get_height() - top - 16)
+
+
 def run(config_path: str) -> None:
     """Open the window and keep it open until the user closes it."""
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    ui = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     pygame.display.set_caption("Pac-Man")
     try:
         pygame.display.set_icon(
@@ -121,6 +143,9 @@ def run(config_path: str) -> None:
 
     while running:
         dt = clock.tick(FPS) / 1000.0
+        surface = pygame.display.get_surface()
+        if surface is not None:
+            screen = surface
 
         # --- input
         for event in pygame.event.get():
@@ -129,7 +154,8 @@ def run(config_path: str) -> None:
 
             elif current == MENU:
                 old = main_menu.index
-                action = main_menu.handle_event(event)
+                action = main_menu.handle_event(
+                    to_ui(event, ui_offset(screen)))
                 if main_menu.index != old:
                     sound.play("move")
                 if action:
@@ -238,26 +264,33 @@ def run(config_path: str) -> None:
         # --- draw
         screen.fill(BACKGROUND)
 
+        if current in (MENU, HELP, SCORES):
+            ui.fill((0, 0, 0, 0))
         if current == MENU:
             data = state.all_data_to_dict()
             ox, oy, cell = maze_view.layout(len(data["maze"][0]),
-                                            len(data["maze"]), MENU_AREA)
+                                            len(data["maze"]),
+                                            screen.get_rect())
             maze_view.draw_maze(screen, data["maze"], ox, oy, cell,
                                 theme.FAINT_WALL, theme.FAINT_WALL)
-            main_menu.draw(screen)
-            menu.draw_tagline(screen)
-            menu.draw_parade(screen)
-            menu.draw_leaderboard(screen, scores)
-            menu.draw_hint(screen)
+            main_menu.draw(ui)
+            menu.draw_tagline(ui)
+            menu.draw_parade(ui)
+            menu.draw_leaderboard(ui, scores)
+            menu.draw_hint(ui)
+            screen.blit(ui, ui_offset(screen))
         elif current == HELP:
-            screens.draw_help(screen)
+            screens.draw_help(ui)
+            screen.blit(ui, ui_offset(screen))
         elif current == SCORES:
-            screens.draw_scores(screen, scores)
+            screens.draw_scores(ui, scores)
+            screen.blit(ui, ui_offset(screen))
         else:
             data = state.all_data_to_dict()
             player = data["player"]
             ox, oy, cell = maze_view.layout(len(data["maze"][0]),
-                                            len(data["maze"]), GAME_AREA)
+                                            len(data["maze"]),
+                                            game_area(screen))
 
             maze_view.draw_maze(screen, data["maze"], ox, oy, cell)
             maze_view.draw_pacgums(screen, data["pacgums"],
@@ -273,6 +306,9 @@ def run(config_path: str) -> None:
                                  cell)
             hud.draw_hud(screen, data, len(config.levels))
             if current == PAUSED:
+                top = screen.get_height() // 2 - 240
+                pause_menu.title_y = top + 60
+                pause_menu.items_y = top + 165
                 menu.dim(screen)
                 menu.draw_pause_panel(screen, data["score"],
                                       min(data["level"] + 1,
