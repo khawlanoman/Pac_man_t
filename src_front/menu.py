@@ -130,7 +130,7 @@ class Menu:
 
     def __init__(self, items: list[tuple[str, str]], title: str,
                  title_y: int = 124, items_y: int = 322,
-                 title_size=56) -> None:
+                 title_size: int = 56) -> None:
         """Build a menu.
 
         Args:

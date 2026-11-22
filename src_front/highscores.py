@@ -104,4 +104,4 @@ def qualifies(entries: list[dict], score: int) -> bool:
     """Whether `score` earns a place in the table."""
     if len(entries) < MAX_ENTRIES:
         return True
-    return score > entries[-1]["score"]
+    return score > int(entries[-1]["score"])

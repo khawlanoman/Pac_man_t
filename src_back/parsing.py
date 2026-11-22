@@ -3,7 +3,8 @@ from pydantic import ValidationError
 from .models import Game_config
 from argparse import Namespace
 
-def pars_config(file:Namespace) :
+
+def pars_config(Namespace: Namespace) :
 
     try:
         with open(file, "r") as file:
