@@ -41,7 +41,7 @@ class Game_state:
     def initialize_level(self) -> None:
         """ this function  for  initialization all the data we need  to use """
         exclude_po = []
-        player_position = loader.get_center_position(self.width, self.height)
+        player_position = loader.get_center_position(self.maze, self.width, self.height)
 
         ghosts_position = loader.place_ghosts(self.width, self.height)
 
@@ -199,7 +199,7 @@ class Game_state:
            self.game_status = Game_status.GAME_OVER
            return
         
-        player_position = loader.get_center_position(self.width, self.height)
+        player_position = loader.get_center_position(self.maze, self.width, self.height)
         ghosts_position = loader.place_ghosts(self.width, self.height)
 
         self.player.x, self.player.y = player_position

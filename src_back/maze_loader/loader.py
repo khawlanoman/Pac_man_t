@@ -55,11 +55,23 @@ def  get_valid_neighbors(maze, x: int,y :int)-> list:
     return neighbors_valid
 
 
-def get_center_position(width:int , height: int)-> tuple:
+def get_center_position(maze,width:int , height: int)-> tuple:
     """ take the first pacman position  in the center of maze"""
     center_x = width // 2
     center_y = height // 2
 
+    
+    if maze[center_y][center_x] == 15:
+        neighbors = ((0, 1), (-1, 0), (1, 0), (0, -1))
+        valid_neighbors = []
+
+        for i in neighbors:
+            nx,ny = center_x + i[0] , center_y +i[1]
+            if maze[ny][nx] != 15:
+                valid_neighbors.append((nx,ny))
+            else:
+                continue
+        return(valid_neighbors[0])
     return (center_x , center_y)
 
 def get_corner_positions(width: int, height: int) -> list:
