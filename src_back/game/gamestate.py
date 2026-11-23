@@ -316,7 +316,7 @@ class Game_state:
         self.initialize_level()
         self.player.lives = current_lives
         if self.level > len(self.config.levels):
-                self.game_status =  Game_status.VICTORY
+                self.game_status = Game_status.VICTORY
 
     
     def cheat_add_lives(self) -> None:

@@ -247,13 +247,15 @@ def run(config_path: str) -> None:
                 before = sound_snapshot(state)
                 elapsed += dt
                 state.update_timers(dt)
+                if state.timer <= 0.0:
+                    state.timer = config.level_max_time
+                    state.rest_player()
                 state.update_ghosts_time(dt)
                 state.player.speed = (TURBO_SPEED if state.cheats.get("turbo")
                                       else PLAYER_SPEED)
                 state.move_player(dt)
                 state.check_pacgum_at_player()
-                if not state.cheats.get("freeze"):
-                    state.move_ghosts(dt)
+                state.move_ghosts(0.0 if state.cheats.get("freeze") else dt)
                 state.check_ghost_collision()
                 state.check_level_complete()
                 sound.react(before, sound_snapshot(state))
