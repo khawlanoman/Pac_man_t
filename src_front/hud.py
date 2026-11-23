@@ -96,7 +96,7 @@ def draw_hud(screen: pygame.Surface, data: dict, total_levels: int) -> None:
     draw_lives(screen, data["player"]["lives"], card.left + 170, top + 8)
     level = min(data["level"] + 1, total_levels)
     draw_label(screen, "LEVEL", f"{level}/{total_levels}",
-               card.right + 238, top, align="center")
+               card.left + 400, top, align="center")
 
     seconds = max(0, int(data["timer"] + 0.999))
     clock = f"{seconds // 60}:{seconds % 60:02d}"

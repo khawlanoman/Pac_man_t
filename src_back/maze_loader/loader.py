@@ -90,9 +90,9 @@ def place_super_pacgums(width: int, height: int)-> list:
 
 def place_ghosts(width: int, height: int)-> list:
     """  this method for ghost positions """
-    positions = [(1,0),(width - 2, 0)
-                     ,(1, height - 1)
-                     ,(width - 2, height - 1)]
+    positions = [(0,0),(width - 1, 0)
+                     ,(0, height - 1)
+                     ,(width - 1, height - 1)]
     
     return positions
 

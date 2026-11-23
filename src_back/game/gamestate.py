@@ -242,6 +242,7 @@ class Game_state:
             elif ghost.state ==  Ghost_state.FRIGHTENED:
                 ghost.state = Ghost_state.EATEN
                 ghost.respawn_time = 5.0
+                ghost.time_sleep = 3.0
             
             else:
                 self.rest_player()
@@ -286,8 +287,6 @@ class Game_state:
         elif ghost.ghost_type == Ghost_type.CLYDE:
             ghost.x,ghost.y = ghosts_position[3][0], ghosts_position[3][1]
         return (ghost.x, ghost.y)
-
-
 
 
     def check_level_complete(self) -> None:
