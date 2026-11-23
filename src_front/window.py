@@ -1,6 +1,7 @@
 """Opens the game window and runs the main loop."""
 
 import pygame
+import warnings
 from src_back import parsing
 from src_back.game.gamestate import Game_state
 from src_back.game.constants import Game_status
@@ -109,6 +110,13 @@ def run(config_path: str) -> None:
     """Open the window and keep it open until the user closes it."""
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            game_window = pygame.Window.from_display_module()
+            game_window.minimum_size = (WIDTH, HEIGHT)
+    except (AttributeError, pygame.error):
+        pass
     ui = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     pygame.display.set_caption("Pac-Man")
     try:
