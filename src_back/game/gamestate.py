@@ -29,13 +29,7 @@ class Game_state:
                  self.cheats = cheats
                  self.config = config
                  self.highscores = highscores
-                
-                #  if self.level == 0:
-                #     level_seed = self.config.seed
-                #  else:
-                #     level_seed = randint(1, 100)
 
-                #  self.grid = grid
                  self.maze = maze
 
     def initialize_level(self) -> None:
@@ -56,10 +50,6 @@ class Game_state:
             level_seed = self.config.seed
         else:
             level_seed = randint(1, 100)
-        
-        
-        
-        # grid = self.grid
 
         self.pacgums = loader.place_pacgums(self.maze,self.config.pacgum,exclude_po,level_seed)
         self.super_pacgums = loader.place_super_pacgums(self.width,self.height)
@@ -80,7 +70,6 @@ class Game_state:
                                 Ghost_type.CLYDE,Ghost_state.CHASE,ghosts_position[3],ghost_freaid)
         
         self.ghosts = [blinky_ghost,plinky_ghost,inky_ghost,clyde_ghost]
-        # self.ghosts = [plinky_ghost]
         self.timer = self.config.level_max_time
 
         self.game_status = Game_status.PLAYING
@@ -241,8 +230,8 @@ class Game_state:
 
             elif ghost.state ==  Ghost_state.FRIGHTENED:
                 ghost.state = Ghost_state.EATEN
-                ghost.respawn_time = 5.0
-                ghost.time_sleep = 3.0
+                ghost.respawn_time = 6.0
+                ghost.time_sleep = 8.0
             
             else:
                 self.rest_player()
