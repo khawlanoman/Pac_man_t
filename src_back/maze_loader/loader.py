@@ -2,6 +2,7 @@ from mazegenerator import MazeGenerator
 from src_back.game.constants import Directions
 from random import Random
 from ..game import constants
+from typing import List, Set, Tuple
 
 
 def load_maze(width: int, height: int, seed: int) -> list:
@@ -10,7 +11,8 @@ def load_maze(width: int, height: int, seed: int) -> list:
     return grid.maze
 
 
-def has_wall(maze, x, y, direction):
+def has_wall(maze: List[List[int]], x: int, y: int,
+             direction: Directions) -> bool:
     """this function is check if the  cell has
     the walls is return true or false"""
     cell_bit = maze[y][x]
@@ -18,9 +20,12 @@ def has_wall(maze, x, y, direction):
     return (cell_bit & dire_bit) != 0
 
 
-def can_move(maze, x, y, direction):
+def can_move(maze: List[List[int]], x: int, y: int,
+             direction: Directions) -> bool:
     """this function is check if the cell has the
     wall in this direction  to can move or not """
+    if direction is None:
+        return False
     width = len(maze[0])
     height = len(maze)
 
@@ -40,7 +45,8 @@ def can_move(maze, x, y, direction):
     return True
 
 
-def get_valid_neighbors(maze, x: int, y: int) -> list:
+def get_valid_neighbors(maze: List[List[int]], x: int,
+                        y: int) -> list[Tuple[int, int]]:
     """this function is for check the neighbors"""
     neighbors_valid = []
     for d in Directions:
@@ -51,7 +57,8 @@ def get_valid_neighbors(maze, x: int, y: int) -> list:
     return neighbors_valid
 
 
-def get_center_position(maze, width: int, height: int) -> tuple:
+def get_center_position(maze: List[List[int]], width: int,
+                        height: int) -> Tuple[int, int]:
     """ take the first pacman position  in the center of maze"""
     center_x = width // 2
     center_y = height // 2
@@ -70,16 +77,17 @@ def get_center_position(maze, width: int, height: int) -> tuple:
     return (center_x, center_y)
 
 
-def get_corner_positions(width: int, height: int) -> list:
+def get_corner_positions(width: int, height: int) -> List[Tuple[int, int]]:
     """ this method for the corner of maze
     for the position of super pacgums """
-    positions = [(0, 0), (width - 1, 0)
-                 , (0, height - 1)
-                 , (width - 1, height - 1)]
+    positions = [(0, 0),
+                 (width - 1, 0),
+                 (0, height - 1),
+                 (width - 1, height - 1)]
     return positions
 
 
-def place_super_pacgums(width: int, height: int) -> list:
+def place_super_pacgums(width: int, height: int) -> Set[Tuple[int, int]]:
     """ this method for  the position of super
     pacgums by  get_corner_positions"""
     list_place = get_corner_positions(width, height)
@@ -88,27 +96,30 @@ def place_super_pacgums(width: int, height: int) -> list:
 
 def place_ghosts(width: int, height: int) -> list:
     """  this method for ghost positions """
-    positions = [(0, 0), (width - 1, 0)
-                 , (0, height - 1)
-                 , (width - 1, height - 1)]
+    positions = [(0, 0),
+                 (width - 1, 0),
+                 (0, height - 1),
+                 (width - 1, height - 1)]
     return positions
 
-def place_pacgums(maze, count:int, exclude_po, seed:int) -> list:
+
+def place_pacgums(maze: List[List[int]], count: int, exclude_po: List[list],
+                  seed: int) -> Set[Tuple[int, int]]:
     """ this method for  distribution
     the pacgums inside the maze'"""
-    
+
     width = len(maze[0])
     height = len(maze)
 
-    places= []
+    places = []
 
-    for y in range(height-1) :
-        for x in range(width-1):
-            if maze[y][x] == 15 :
+    for y in range(height - 1):
+        for x in range(width - 1):
+            if maze[y][x] == 15:
                 continue
             elif (x, y) in exclude_po:
                 continue
-            places.append((x,y))
+            places.append((x, y))
     if count > len(places):
         print("error pacgum number ")
         count = len(places)
@@ -117,4 +128,3 @@ def place_pacgums(maze, count:int, exclude_po, seed:int) -> list:
     rendom_gen.shuffle(places)
     pacgums = set(places[0: count])
     return pacgums
-

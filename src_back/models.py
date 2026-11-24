@@ -1,18 +1,88 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+from typing import Self
+from collections import namedtuple
+
+Level = namedtuple("Level", ["width", "height"])
 
 
 class Levels_check(BaseModel):
-    width: int= Field(gt= 6)
-    height: int= Field(gt= 6)
+    width: int = 15
+    height: int = 15
+
+    @model_validator(mode='after')
+    def check_validate(self) -> Self:
+        if self.width < 9:
+            print(f"Error : width= {self.width} < 9; using default 9")
+            self.width = 9
+
+        if self.height < 9:
+            print(f"Error : height= {self.height} < 9; using default 9")
+            self.height = 9
+        return self
+
+    # def default_levels() -> list:
+    #     w_level = 15
+    #     h_Level = 15
+    #     Levels_def = []
+    #     for _ in range(10):
+    #         Levels_def.append((w_level,h_Level))
+
+    #     print(Levels_def)
+    #     return Levels_def
 
 
 class Game_config(BaseModel):
-    highscore_filename: str= Field(default= "data/highscores.json")
-    lives: int= Field(default= 3, ge = 0)
-    pacgum: int= Field(default = 42, ge = 0)
-    points_per_pacgum: int = Field(default = 10, ge = 0)
-    points_per_super_pacgum: int = Field(default = 20, ge = 0)
-    points_per_ghost: int = Field(default= 100, ge= 0)
-    seed: int = Field(default = 42 ,ge=0)
-    level_max_time: float= Field(default= 90.0, ge= 1)
+    highscore_filename: str = Field(default="data/highscores.json")
+    lives: int = 3
+    pacgum: int = 10
+    points_per_pacgum: int = 10
+    points_per_super_pacgum: int = 20
+    points_per_ghost: int = 100
+    seed: int = 42
+    level_max_time: float = 90.0
     levels: list[Levels_check]
+
+    @model_validator(mode='after')
+    def check_validate(self) -> Self:
+        if self.lives < 3:
+            print(f"Error : lives= {self.lives} < 3; using default 3")
+            self.lives = 3
+
+        if self.pacgum < 5:
+            print(f"Error : pacgum= {self.pacgum} < 5; using default 5")
+            self.pacgum = 5
+
+        if self.points_per_pacgum < 10:
+            print(f"Error : points_per_pacgum= {self.points_per_pacgum}",
+                  "< 10; using default 10")
+            self.points_per_pacgum = 10
+
+        if self.points_per_super_pacgum < 20:
+            print("Error : points_per_super_pacgum=",
+                  f"{self.points_per_super_pacgum} < 20; using default 20")
+            self.points_per_super_pacgum = 20
+
+        if self.points_per_ghost < 100:
+            print(f"Error : points_per_ghost= {self.points_per_ghost}",
+                  " < 100; using default 100")
+            self.points_per_super_pacgum = 100
+
+        if self.seed < 1:
+            print(f"Error : seed= {self.seed} < 1; using default 42")
+            self.seed = 42
+
+        if self.level_max_time < 60:
+            print(f"Error : level_max_time= {self.level_max_time}",
+                  " < 60 s; using default 90")
+            self.level_max_time = 90
+
+        if len(self.levels) < 10:
+            print(f"Error : levels= {len(self.levels)}",
+                  " < 10 s; using default 10")
+            levels_def = []
+
+            for _ in range(10):
+                levels_def.append(Level(15, 15))
+            self.levels = levels_def
+
+        return self

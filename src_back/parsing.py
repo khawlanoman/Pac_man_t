@@ -1,14 +1,14 @@
 import json
 from pydantic import ValidationError
 from .models import Game_config
-from argparse import Namespace
+from typing import Any
 
 
-def pars_config(file: Namespace) -> None:
+def pars_config(file: str) -> Any:
 
     try:
-        with open(file, "r") as file:
-            data = json.load(file)
+        with open(file, "r") as f:
+            data = json.load(f)
 
     except json.JSONDecodeError as e:
         print("invalid json syntax:", e)

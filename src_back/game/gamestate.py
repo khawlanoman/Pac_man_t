@@ -9,6 +9,7 @@ from ..models import Game_config
 import random
 from random import randint
 from ..maze_loader import loader
+from typing import List, Tuple, Any
 
 
 class Game_state:
@@ -40,7 +41,7 @@ class Game_state:
     def initialize_level(self) -> None:
         """ this function  for  initialization
         all the data we need  to use """
-        exclude_po = []
+        exclude_po: List[Any] = []
         player_position = loader.get_center_position(self.maze,
                                                      self.width,
                                                      self.height)
@@ -131,7 +132,7 @@ class Game_state:
                 self.player.is_power = False
                 self.player.power_time = 0.0
 
-    def move_player(self, dt):
+    def move_player(self, dt: float) -> None:
         """ this methode is moves the player
         in the current direction if there is no wall """
         tile_x = round(self.player.x)
@@ -149,7 +150,8 @@ class Game_state:
             if not loader.can_move(self.maze, tile_x, tile_y,
                                    self.player.direction):
                 return
-        dx, dy = self.player.direction.value[:2]
+        direction = self.player.direction
+        dx, dy = direction.value[:2] if direction is not None else (0, 0)
         target_x = tile_x + dx
         target_y = tile_y + dy
         distance = self.player.speed * dt
@@ -241,7 +243,7 @@ class Game_state:
                 self.rest_player()
                 break
 
-    def update_ghosts_time(self, time) -> None:
+    def update_ghosts_time(self, time: float) -> None:
         """ this function is for  update the time
         of freaid ghost and respawn time of ghost """
         for ghost in self.ghosts:
@@ -261,7 +263,7 @@ class Game_state:
                     ghost.time_sleep = 0.0
                     ghost.state = Ghost_state.CHASE
 
-    def check_ghost(self, ghost) -> None:
+    def check_ghost(self, ghost: GhostState) -> Tuple[float, float]:
         ghosts_position = loader.place_ghosts(self.width, self.height)
 
         if ghost.ghost_type == Ghost_type.BLINKY:
@@ -304,7 +306,7 @@ class Game_state:
         """this method is for add lives to the player"""
         self.player.lives += 1
 
-    def move_ghosts(self, dt) -> None:
+    def move_ghosts(self, dt: float) -> None:
         """ this method is for move the ghosts  to follow the player"""
         target_x = self.player.x
         target_y = self.player.y
@@ -326,7 +328,7 @@ class Game_state:
                 ghost.last_tile = (ghost_x, ghost_y)
 
                 if ghost.state == Ghost_state.CHASE:
-                    all_directions = []
+                    all_directions: List[str] = []
                     for i in Directions:
                         if loader.can_move(self.maze, ghost_x, ghost_y, i):
                             all_directions.append(i.name)
