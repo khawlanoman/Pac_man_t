@@ -1,8 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
-from typing import Self
-from collections import namedtuple
-
-Level = namedtuple("Level", ["width", "height"])
+from typing import Self, Dict
 
 
 class Levels_check(BaseModel):
@@ -10,7 +7,7 @@ class Levels_check(BaseModel):
     height: int = 15
 
     @model_validator(mode='after')
-    def check_validate(self) -> Self:
+    def check_levles(self) -> Self:
         if self.width < 9:
             print(f"Error : width= {self.width} < 9; using default 9")
             self.width = 9
@@ -19,16 +16,6 @@ class Levels_check(BaseModel):
             print(f"Error : height= {self.height} < 9; using default 9")
             self.height = 9
         return self
-
-    # def default_levels() -> list:
-    #     w_level = 15
-    #     h_Level = 15
-    #     Levels_def = []
-    #     for _ in range(10):
-    #         Levels_def.append((w_level,h_Level))
-
-    #     print(Levels_def)
-    #     return Levels_def
 
 
 class Game_config(BaseModel):
@@ -41,6 +28,22 @@ class Game_config(BaseModel):
     seed: int = 42
     level_max_time: float = 90.0
     levels: list[Levels_check]
+
+    @model_validator(mode='before')
+    def check_levles_before(cls, data: Dict) -> Dict:
+        levels = data.get("levels")
+        if levels is None or len(levels) < 10:
+            if levels is None:
+                print("Error: levels are missing")
+            else:
+                print(f"Error : levels= {len(levels)}",
+                      " < 10 s; using default 10")
+                levels_def = []
+
+                for _ in range(10):
+                    levels_def.append(Levels_check(width=15, height=15))
+                data["levels"] = levels_def
+        return data
 
     @model_validator(mode='after')
     def check_validate(self) -> Self:
@@ -76,13 +79,13 @@ class Game_config(BaseModel):
                   " < 60 s; using default 90")
             self.level_max_time = 90
 
-        if len(self.levels) < 10:
-            print(f"Error : levels= {len(self.levels)}",
-                  " < 10 s; using default 10")
-            levels_def = []
+        # if len(self.levels) < 10:
+        #     print(f"Error : levels= {len(self.levels)}",
+        #           " < 10 s; using default 10")
+        #     # levels_def: list[Levels_check] = []
 
-            for _ in range(10):
-                levels_def.append(Level(15, 15))
-            self.levels = levels_def
+        #     # for _ in range(10):
+        #     #     levels_def.append(Level(15, 15))
+        #     self.levels = levels_def
 
         return self
