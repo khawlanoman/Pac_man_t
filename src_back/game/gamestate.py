@@ -13,10 +13,12 @@ from typing import List, Tuple, Any
 
 
 class Game_state:
-
+    """Represents the current state of the game,
+    managing all game data and entities, including
+    the maze, player, ghosts, score, lives, and game status."""
     def __init__(self, maze: list[list[int]], width: int,
                  height: int, pacgums: set[tuple[int, int]],
-                 super_pacgums: set[tuple[int, int]], player: PlayerState,
+                 super_pacgums: List[Tuple[int, int]], player: PlayerState,
                  ghosts: list[GhostState], score: int,
                  level: int, timer: float, game_status: Game_status,
                  cheat_mode: bool, cheats: dict[str, bool],
@@ -63,7 +65,6 @@ class Game_state:
                                             exclude_po, level_seed)
         self.super_pacgums = loader.place_super_pacgums(self.width,
                                                         self.height)
-
         self.player = PlayerState(player_position[0], player_position[1],
                                   Directions.RIGHT, None,
                                   self.config.lives, self.score)
@@ -264,6 +265,7 @@ class Game_state:
                     ghost.state = Ghost_state.CHASE
 
     def check_ghost(self, ghost: GhostState) -> Tuple[float, float]:
+        """this method is for initializing each ghost  position """
         ghosts_position = loader.place_ghosts(self.width, self.height)
 
         if ghost.ghost_type == Ghost_type.BLINKY:
@@ -277,7 +279,7 @@ class Game_state:
         return (ghost.x, ghost.y)
 
     def check_level_complete(self) -> None:
-
+        """ this method is for check if the level complete"""
         if len(self.pacgums) == 0:
             self.level += 1
             current_lives = self.player.lives

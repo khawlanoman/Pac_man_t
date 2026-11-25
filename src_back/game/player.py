@@ -1,7 +1,9 @@
 from .constants import Directions
+from typing import Dict
 
 
 class PlayerState:
+    """this class is for initializing the player info"""
     def __init__(self, x: float = 0.0, y: float = 0.0,
                  direction: Directions | None = None,
                  next_direction: Directions | None = None,
@@ -17,7 +19,9 @@ class PlayerState:
         self.power_time = power_time
         self.speed = speed
 
-    def player_dict(self) -> dict:
+    def player_dict(self) -> Dict[str, float | str | Directions | None]:
+        """This method adds all player data to a dictionary so we
+        can retrieve and work with the player data later"""
         player_result = {"x": self.x,
                          "y": self.y,
                          "direction": (self.direction.name.lower()

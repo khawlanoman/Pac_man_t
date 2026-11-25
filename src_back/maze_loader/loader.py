@@ -5,7 +5,7 @@ from ..game import constants
 from typing import List, Set, Tuple
 
 
-def load_maze(width: int, height: int, seed: int) -> list:
+def load_maze(width: int, height: int, seed: int) -> List[List[int]]:
     """this function load the maze from mazegenerator"""
     grid = MazeGenerator(size=(width, height), perfect=False, seed=seed)
     return grid.maze
@@ -21,7 +21,7 @@ def has_wall(maze: List[List[int]], x: int, y: int,
 
 
 def can_move(maze: List[List[int]], x: int, y: int,
-             direction: Directions) -> bool:
+             direction: Directions | None) -> bool:
     """this function is check if the cell has the
     wall in this direction  to can move or not """
     if direction is None:
@@ -87,14 +87,15 @@ def get_corner_positions(width: int, height: int) -> List[Tuple[int, int]]:
     return positions
 
 
-def place_super_pacgums(width: int, height: int) -> Set[Tuple[int, int]]:
+def place_super_pacgums(width: int, height: int) -> List[Tuple[int, int]]:
     """ this method for  the position of super
     pacgums by  get_corner_positions"""
     list_place = get_corner_positions(width, height)
+
     return list_place
 
 
-def place_ghosts(width: int, height: int) -> list:
+def place_ghosts(width: int, height: int) -> List[Tuple[int, int]]:
     """  this method for ghost positions """
     positions = [(0, 0),
                  (width - 1, 0),

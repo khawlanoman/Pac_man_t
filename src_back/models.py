@@ -1,13 +1,15 @@
 from pydantic import BaseModel, Field, model_validator
-from typing import Self, Dict
+from typing import Self, Dict, Any, List
 
 
 class Levels_check(BaseModel):
+    """  this class model is for  handle the width and height of levels """
     width: int = 15
     height: int = 15
 
     @model_validator(mode='after')
     def check_levles(self) -> Self:
+        """ this method is for handel  the size of width and hieght"""
         if self.width < 9:
             print(f"Error : width= {self.width} < 9; using default 9")
             self.width = 9
@@ -19,6 +21,7 @@ class Levels_check(BaseModel):
 
 
 class Game_config(BaseModel):
+    """ this class is for check all the data """
     highscore_filename: str = Field(default="data/highscores.json")
     lives: int = 3
     pacgum: int = 10
@@ -30,7 +33,9 @@ class Game_config(BaseModel):
     levels: list[Levels_check]
 
     @model_validator(mode='before')
-    def check_levles_before(cls, data: Dict) -> Dict:
+    def check_levles_before(cls, data: Dict[str, int | float
+                            | str | List[Levels_check]]) -> Any:
+        """ this method for  check the levels before  take the data  """
         levels = data.get("levels")
         if levels is None or len(levels) < 10:
             if levels is None:
@@ -47,6 +52,7 @@ class Game_config(BaseModel):
 
     @model_validator(mode='after')
     def check_validate(self) -> Self:
+        """ this method for  check the all data  """
         if self.lives < 3:
             print(f"Error : lives= {self.lives} < 3; using default 3")
             self.lives = 3
@@ -78,14 +84,5 @@ class Game_config(BaseModel):
             print(f"Error : level_max_time= {self.level_max_time}",
                   " < 60 s; using default 90")
             self.level_max_time = 90
-
-        # if len(self.levels) < 10:
-        #     print(f"Error : levels= {len(self.levels)}",
-        #           " < 10 s; using default 10")
-        #     # levels_def: list[Levels_check] = []
-
-        #     # for _ in range(10):
-        #     #     levels_def.append(Level(15, 15))
-        #     self.levels = levels_def
 
         return self

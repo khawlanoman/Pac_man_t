@@ -1,7 +1,9 @@
 from .constants import Directions, Ghost_type, Ghost_state
+from typing import Dict
 
 
 class GhostState:
+    """this class is for initializing the ghost info"""
     def __init__(self, x: float = 0.0, y: float = 0.0,
                  direction: Directions = Directions.LEFT,
                  ghost_type: Ghost_type = Ghost_type.BLINKY,
@@ -22,7 +24,9 @@ class GhostState:
         self.last_tile: tuple[int, int] | None = None
         self.time_sleep = time_sleep
 
-    def ghosts_dict(self) -> dict:
+    def ghosts_dict(self) -> Dict[str, object]:
+        """This method adds all ghost data to a dictionary so we
+        can retrieve and work with the ghost data later."""
         ghosts_result = {"x": self.x,
                          "y": self.y,
                          "direction": self.direction.name.lower(),
