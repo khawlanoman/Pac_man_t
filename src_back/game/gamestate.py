@@ -183,9 +183,9 @@ class Game_state:
             self.super_pacgums.remove((player_x, player_y))
 
             for ghost in self.ghosts:
-                if ghost.state == Ghost_state.CHASE:
+                if ghost.state in (Ghost_state.CHASE, Ghost_state.FRIGHTENED):
                     ghost.state = Ghost_state.FRIGHTENED
-                    ghost.ghost_freaid = 7.0
+                    ghost.ghost_freaid += 7.0
             self.score += self.config.points_per_super_pacgum
 
     def rest_player(self) -> None:
