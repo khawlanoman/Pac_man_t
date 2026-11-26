@@ -331,9 +331,9 @@ class Game_state:
 
                 if ghost.state == Ghost_state.CHASE:
                     all_directions: List[str] = []
-                    for i in Directions:
-                        if loader.can_move(self.maze, ghost_x, ghost_y, i):
-                            all_directions.append(i.name)
+                    for d in Directions:
+                        if loader.can_move(self.maze, ghost_x, ghost_y, d):
+                            all_directions.append(d.name)
 
                     oppesite = Directions[Opposite[ghost.direction.name].value]
 
@@ -342,14 +342,14 @@ class Game_state:
                         all_directions.remove(oppesite.name)
 
                     distance_direct = {}
-                    for i in all_directions:
+                    for dire in all_directions:
 
-                        direct = Directions[i]
+                        direct = Directions[dire]
                         dx, dy = direct.value[:2]
                         nextp_x, nextp_y = ((dx + ghost_x), (dy + ghost_y))
                         distance = (abs(target_x - nextp_x)
                                     + abs(target_y - nextp_y))
-                        distance_direct[i] = distance
+                        distance_direct[dire] = distance
 
                     keys = []
                     min_distance = min(distance_direct.values())

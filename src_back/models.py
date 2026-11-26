@@ -37,17 +37,18 @@ class Game_config(BaseModel):
                             | str | List[Levels_check]]) -> Any:
         """ this method for  check the levels before  take the data  """
         levels = data.get("levels")
-        if levels is None or len(levels) < 10:
-            if levels is None:
-                print("Error: levels are missing")
-            else:
-                print(f"Error : levels= {len(levels)}",
-                      " < 10 s; using default 10")
-                levels_def = []
+        if levels is None:
+            print("Error: levels are missing")
 
-                for _ in range(10):
-                    levels_def.append(Levels_check(width=15, height=15))
-                data["levels"] = levels_def
+        elif not isinstance(levels, list):
+            print("Error: levels must be a list")
+
+        elif len(levels) < 10:
+            print(f"Error: levels = {len(levels)} < 10")
+            levels_def = []
+            for _ in range(10):
+                levels_def.append(Levels_check(width=15, height=15))
+            data["levels"] = levels_def
         return data
 
     @model_validator(mode='after')

@@ -30,7 +30,3 @@ fclean:clean
 lint:
 	$(PYTHON) -m flake8 .
 	$(PYTHON) -m  mypy . $(MYPY_FLAGS) 
-
-lint-strict:
-	$(PYTHON) -m flake8 .
-	$(PYTHON) -m mypy . --strict

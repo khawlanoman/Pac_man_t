@@ -2,10 +2,10 @@ from mazegenerator import MazeGenerator
 from src_back.game.constants import Directions
 from random import Random
 from ..game import constants
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Any
 
 
-def load_maze(width: int, height: int, seed: int) -> List[List[int]]:
+def load_maze(width: int, height: int, seed: int) -> Any:
     """this function load the maze from mazegenerator"""
     grid = MazeGenerator(size=(width, height), perfect=False, seed=seed)
     return grid.maze
