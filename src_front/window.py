@@ -132,7 +132,7 @@ def run(config_path: str) -> None:
     config = parsing.pars_config(config_path)
     level = config.levels[0]
     maze = loader.load_maze(level.width, level.height, config.seed)
-    state = Game_state(maze, level.width, level.height, set(), set(),
+    state = Game_state(maze, level.width, level.height, set(), [],
                        PlayerState(),
                        [], 0, 0, config.level_max_time,
                        Game_status.PLAYING, False, {}, config, [])
