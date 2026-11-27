@@ -319,6 +319,9 @@ class Game_state:
 
             if ghost.state == Ghost_state.EATEN:
                 ghost.x, ghost.y = ghost.my_corner
+                print(self.score)
+                self.score += self.config.points_per_ghost
+                print(self.score)
                 ghost.state = Ghost_state.WAITING
 
             if ghost.state == Ghost_state.WAITING:
