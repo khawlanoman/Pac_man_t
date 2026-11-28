@@ -54,6 +54,9 @@ class Game_config(BaseModel):
     @model_validator(mode='after')
     def check_validate(self) -> Self:
         """ this method for  check the all data  """
+        if not self.highscore_filename.endswith(".json"):
+            print("Error : highscore_filename should be json file ")
+            self.highscore_filename = "data/highscores.json"
         if self.lives < 3:
             print(f"Error : lives= {self.lives} < 3; using default 3")
             self.lives = 3
