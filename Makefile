@@ -23,10 +23,11 @@ clean:
 	find . -type d -name "__pycache__" -prune -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 	rm -rf .mypy_cache
+	rm -rf build
 
-fclean:clean
+fclean: clean
 	rm -rf data/highscores.json
-
+	rm -rf dist
 lint:
 	$(PYTHON) -m flake8 .
 	$(PYTHON) -m  mypy . $(MYPY_FLAGS) 
