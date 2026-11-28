@@ -73,13 +73,13 @@ def toggle_sound(kind: str, main_menu: menu.Menu,
 def load_level(state: Game_state) -> None:
     """Build the maze for state.level from the config.
 
-    Temporary: the backend reuses the first maze on every level, so
-    the frontend rebuilds it whenever the level number changes.
+    Level 1 uses the fixed seed from the config; every later level
+    gets a random seed, as the subject requires.
     """
     size = state.config.levels[state.level]
     state.width, state.height = size.width, size.height
     seed = (state.config.seed if state.level == 0
-            else random.randint(1, 1_000_000))
+            else random.SystemRandom().randint(1, 1_000_000))
     state.maze = loader.load_maze(size.width, size.height, seed)
     lives = state.player.lives
     state.initialize_level()
