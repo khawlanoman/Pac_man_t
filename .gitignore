@@ -16,3 +16,8 @@ data/highscores.json
 
 # OS clutter
 .DS_Store
+
+# Packaging output (pacman.spec stays committed)
+build/
+dist/
+mazegenerator-*.whl

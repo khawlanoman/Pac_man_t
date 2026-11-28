@@ -2,9 +2,10 @@
 
 import pygame
 from src_front import sprites, theme
+from src_front.paths import asset
 
 
-FONT_PATH = "assets/fonts/game_font_1.TTF"
+FONT_PATH = asset("fonts", "game_font_1.TTF")
 _fonts: dict[int, pygame.font.Font] = {}
 MAX_LIFE_ICONS = 4
 

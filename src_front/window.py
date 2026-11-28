@@ -1,6 +1,7 @@
 """Opens the game window and runs the main loop."""
 
 import pygame
+import random
 import warnings
 from src_back import parsing
 from src_back.game.gamestate import Game_state
@@ -16,6 +17,7 @@ from src_front import screens
 from src_front import endscreen
 from src_front import sound
 from src_back.game.player import PlayerState
+from src_front.paths import asset
 
 WIDTH = 720
 HEIGHT = 800
@@ -76,8 +78,9 @@ def load_level(state: Game_state) -> None:
     """
     size = state.config.levels[state.level]
     state.width, state.height = size.width, size.height
-    state.maze = loader.load_maze(size.width, size.height,
-                                  state.config.seed + state.level)
+    seed = (state.config.seed if state.level == 0
+            else random.randint(1, 1_000_000))
+    state.maze = loader.load_maze(size.width, size.height, seed)
     lives = state.player.lives
     state.initialize_level()
     state.player.lives = lives
@@ -108,6 +111,9 @@ def game_area(screen: pygame.Surface) -> pygame.Rect:
 
 def run(config_path: str) -> None:
     """Open the window and keep it open until the user closes it."""
+    config = parsing.pars_config(config_path)
+    if config is None:
+        raise SystemExit(1)
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     try:
@@ -121,7 +127,7 @@ def run(config_path: str) -> None:
     pygame.display.set_caption("Pac-Man")
     try:
         pygame.display.set_icon(
-            pygame.image.load("assets/sprites/pacman_1.png"))
+            pygame.image.load(asset("sprites", "pacman_1.png")))
     except (pygame.error, OSError):
         pass
     sound.init()
@@ -129,7 +135,6 @@ def run(config_path: str) -> None:
     clock = pygame.time.Clock()
 
     # --- setup: build the level once, before the loop ---
-    config = parsing.pars_config(config_path)
     level = config.levels[0]
     maze = loader.load_maze(level.width, level.height, config.seed)
     state = Game_state(maze, level.width, level.height, set(), [],
@@ -199,6 +204,8 @@ def run(config_path: str) -> None:
                         toggle_cheat(state, "freeze")
                     elif event.key == pygame.K_t:
                         toggle_cheat(state, "turbo")
+                    elif event.key == pygame.K_i:
+                        toggle_cheat(state, "invincible")
                     else:
                         direction = MOVEMENT_KEYS.get(event.key)
                         if direction is not None:

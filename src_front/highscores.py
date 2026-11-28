@@ -98,10 +98,3 @@ def add(entries: list[dict], name: str, score: int) -> list[dict]:
     updated = entries + [{"name": clean_name(name), "score": max(0, score)}]
     updated.sort(key=lambda e: e["score"], reverse=True)
     return updated[:MAX_ENTRIES]
-
-
-def qualifies(entries: list[dict], score: int) -> bool:
-    """Whether `score` earns a place in the table."""
-    if len(entries) < MAX_ENTRIES:
-        return True
-    return score > int(entries[-1]["score"])

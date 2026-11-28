@@ -1,10 +1,9 @@
 """Loads and caches sprite images."""
 
-import os
 
 import pygame
 
-SPRITE_DIR = os.path.join("assets", "sprites")
+from src_front.paths import asset
 
 _cache: dict[tuple[str, int], pygame.Surface] = {}
 
@@ -14,7 +13,7 @@ def load(name: str, size: int) -> pygame.Surface:
     key = (name, size)
     if key not in _cache:
         try:
-            image = pygame.image.load(f"assets/sprites/{name}.png")
+            image = pygame.image.load(asset("sprites", f"{name}.png"))
             image = pygame.transform.smoothscale(image.convert_alpha(),
                                                  (size, size))
         except (pygame.error, OSError):

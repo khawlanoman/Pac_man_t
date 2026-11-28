@@ -6,7 +6,7 @@ MYPY_FLAGS = --warn-return-any --warn-unused-ignores \
              --ignore-missing-imports --disallow-untyped-defs \
              --check-untyped-defs
 
-.PHONY: all install run debug clean lint lint-strict
+.PHONY: all install run debug clean lint package
 
 all: run
 
@@ -30,3 +30,9 @@ fclean:clean
 lint:
 	$(PYTHON) -m flake8 .
 	$(PYTHON) -m  mypy . $(MYPY_FLAGS) 
+
+package:
+	$(PIP) install pyinstaller
+	$(PYTHON) -m PyInstaller --onefile --windowed --name pacman \
+		--add-data "assets:assets" $(MAIN)
+	cp config.json HOW_TO_PLAY.md dist/

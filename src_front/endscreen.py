@@ -30,7 +30,8 @@ class EndScreen:
         if event.key == pygame.K_BACKSPACE:
             self.name = self.name[:-1]
         elif (len(self.name) < highscores.MAX_NAME
-              and event.unicode.isascii() and event.unicode.isalnum()):
+              and event.unicode.isascii()
+              and (event.unicode.isalnum() or event.unicode == " ")):
             self.name += event.unicode.upper()
         return False
 

@@ -13,6 +13,7 @@ CONTROLS = [
     ("L", "EXTRA LIFE (CHEAT)"),
     ("F", "ON/OFF FREEZE GHOSTS (CHEAT)"),
     ("T", "ON/OFF TURBO SPEED (CHEAT)"),
+    ("I", "ON/OFF INVINCIBLE (CHEAT)"),
 ]
 
 RULES = [

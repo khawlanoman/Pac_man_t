@@ -2,8 +2,10 @@
 
 import pygame
 
-SOUND_DIR = "assets/sounds"
-MUSIC_DIR = "assets/music"
+from src_front.paths import asset
+
+SOUND_DIR = asset("sounds")
+MUSIC_DIR = asset("music")
 
 EFFECTS = {
     "chomp": 0.25,
