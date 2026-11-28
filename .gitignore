@@ -20,4 +20,3 @@ data/highscores.json
 # Packaging output (pacman.spec stays committed)
 build/
 dist/
-mazegenerator-*.whl
