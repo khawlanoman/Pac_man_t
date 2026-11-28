@@ -224,7 +224,7 @@ pac-man.py                 reads the argument, turns every error into a clear me
 
 The work was split by layer: the front-end (`src_front`, Makefile, README, assets, packaging) and the back-end (`src_back`, configuration, maze loader). We tracked tasks, tested each feature against the subject, and logged the bugs we found and fixed.
 
-All documents (timeline, team organisation, choices, risks, test plan, blocking points) are in [docs/project_management/](docs/project_management/).
+All documents (timeline, team organisation, choices, risks, test plan, blocking points) are in [[project_management/]([project_management/).
 
 
 ## Resources
